@@ -1,0 +1,11 @@
+*.sce~
+*.sci~
+*.start~
+loader.sce
+cleaner.sce
+lib
+unloader.sce
+*.bin
+jar/
+scilab_en_US_help/
+master_help.xml
