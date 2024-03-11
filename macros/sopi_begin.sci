@@ -18,7 +18,7 @@ function sopi_begin()
     global sopiNameSpace
     sopiNameSpace = struct('verbosity',         0,...
                            'globalConstraints', %f,...
-                           'constants', [])
+                           'id',                0)
     // Create new classes 
     // Main class: sopiVar
     varAttr = list('name',...       // name of the variable to be displayed 

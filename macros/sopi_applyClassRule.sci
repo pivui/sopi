@@ -11,24 +11,24 @@ function c = sopi_applyClassRule(operator, args)
         // nonconvex until otherwise 
         lhs = args
         c   = sopi_classCode('nonconvex',lhs.size)
-        if lhs.isLinear()
+        if sopiVar_isLinear(lhs)
             c = 1
-        elseif lhs.isConvex()
+        elseif sopiVar_isConvex(lhs)
             c = 2 
         end 
     case '>='
         lhs = args
         c   = sopi_classCode('nonconvex',lhs.size)
-        if lhs.isLinear() 
+        if sopiVar_isLinear(lhs)
             c = 1
-        elseif  lhs.isConcave()
+        elseif  sopiVar_isConvex(lhs)
             // concave > 0 <-> -concave < 0 <-> convex <0
             c = 2
         end
     case '='
         lhs = args
         c   = sopi_classCode('nonconvex',lhs.size)
-        if lhs.isLinear()
+        if sopiVar_isLinear(lhs)
             c = 1
         end
     end

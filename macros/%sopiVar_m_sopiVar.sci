@@ -3,16 +3,16 @@ function newVar = %sopiVar_m_sopiVar(var1, var2)
     // check sizes
     ns              = sopi_checkSizeCoherence('mul', var1.size, var2.size)
     // 
-    if var1.isConstant() & var2.isConstant() then
-        newVar          = soop_new('sopiVar')
-        newVar.size     = ns 
+    test = [sopiVar_isConstant(var1), sopiVar_isConstant(var2)]
+    if and(test) then
+        newVar          = sopi_var(ns)
         newVar.space    = 'real'
         newVar.operator = 'constant'
         newVar.class    = var1.class 
         newVar.child    = list(var1.child(1) * var2.child(1))
-    elseif var1.isConstant() & ~var2.isConstant() then
+    elseif test(1) & ~test(2) then
         newVar = sopi_propagateLinearMapping('l',ns,var1.child(1), var2)
-    elseif ~var1.isConstant() & var2.isConstant() then 
+    elseif ~test(1) & test(2) then 
         newVar = sopi_propagateLinearMapping('r',ns,var2.child(1), var1)
     else
         error('Multiplication between sopiVar not yet supported')
@@ -41,8 +41,7 @@ function outVar = sopi_propagateLinearMapping(side, ns, A, var)
             var.child(1) = A * var.child(1)
             outVar = var
         else
-            outVar          = soop_new('sopiVar')
-            outVar.size     = ns 
+            outVar          = sopi_var(ns)
             outVar.space    = 'real'
             outVar.operator = side + 'lm'
             outVar.class    = var.class 
@@ -53,16 +52,14 @@ function outVar = sopi_propagateLinearMapping(side, ns, A, var)
             var.child(1) = var.child(1) * A
             outVar = var
         else
-            outVar          = soop_new('sopiVar')
-            outVar.size     = ns 
+            outVar          = sopi_var(ns)
             outVar.space    = 'real'
             outVar.operator = side + 'lm'
             outVar.class    = var.class 
             outVar.child    = list(A, var)
         end 
     case 'none'
-        outVar          = soop_new('sopiVar')
-        outVar.size     = ns 
+        outVar          = sopi_var(ns)
         outVar.space    = 'real'
         outVar.operator = side + 'lm'
         outVar.class    = var.class 
