@@ -19,38 +19,6 @@ function sopi_begin()
     sopiNameSpace = struct('verbosity',         0,...
                            'globalConstraints', %f,...
                            'constants', [])
-    //
-    sopiNameSpace.constants =  ["LEFT_LINEAR_MAPPING","""llm""",
-                               "RIGHT_LINEAR_MAPPING","""rlm""",
-                               "SUM","""+""",
-                               "FUN","""fun""",
-                               "TRANSPOSE","""transpose""",
-                               "CONSTANT","""constant""",
-                               "QUADRATIC","""quad""",
-                               "REAL","""real""",
-                               "BINARY","""binary""",
-                               "INTEGER","""integer""",
-                               "LEFT","""l""",
-                               "RIGHT","""r""",
-                               "LINEAR_MAPPING","""lm""",
-                               "LESSER_THAN","""<""",
-                               "GREATER_THAN",""">""",
-                               "EQUALS","""=""",
-                               "TIMES","""*""",
-                               "ABS","""abs""",
-                               "NORM","""norm""",
-                               "MAX","""max""",
-                               "POW","""pow""",
-                               "CONSTRAINT","""<>""",
-                               "POSITIVE_DEF","""pd""",
-                               "POSITIVE_SEMIDEF","""psd""",
-                               "NEGATIVE_DEF","""nd""",
-                               "NEGATIVE_SEMIDEF","""nsd""",
-                               "INDEFINITE","""i""",
-                               "CONVEX","""convex""",
-                               "CONCAVE","""concave""",
-                               "NONLINEAR","""nonlinear"""
-                              ]
     // Create new classes 
     // Main class: sopiVar
     varAttr = list('name',...       // name of the variable to be displayed 
@@ -61,9 +29,16 @@ function sopi_begin()
                    'class',...      // class of the math function it represents: linear, convex, etc.
                    'isTmp')      // whether the variable is temporary
                    
-    varMeth = list()
+    varMeth = list('isConstant','isLinear','isConvex','isConcave')
     soop_newClass('sopiVar' , varAttr, varMeth)
-    // TODO: sopiProblem and sopiConstraint
+    // Constraints 
+    cstAttr = list('operator','lhs','class')
+    cstMeth = list()
+    soop_newClass('sopiCst', cstAttr, cstMeth)
+    // Problem 
+    pbAttr  = list('varList','varIdx')
+    pbMeth  = list()
+    soop_newClass('sopiPb', pbAttr, pbMeth)
     
 endfunction
 

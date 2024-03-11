@@ -9,12 +9,12 @@ function funClass = sopi_classCode(key, m, n)
         select (key)
             case ("constant")
                 code = 0
-            case ("affine")
+            case ("linear")
                 code = 1
             case ("convex")
                 code = 2
             case ("concave")
-                code = 3
+                code = -2
             case ("nonconvex")
                 code = 10
             else
@@ -23,5 +23,5 @@ function funClass = sopi_classCode(key, m, n)
     else
         code = key
     end
-    funClass = code * ones(m, n)
+    funClass = code // * ones(m, n)
 endfunction

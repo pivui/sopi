@@ -9,6 +9,7 @@ function var = sopi_var(s1, varargin)
     var.size    = s
     var.space   = 'real'
     var.isTmp   = %f
-    var.class   = sopi_classCode("affine", s(1), s(2))
+    var.class   = sopi_classCode("linear", s(1), s(2))
+    var.operator = 'none'
 endfunction
 
