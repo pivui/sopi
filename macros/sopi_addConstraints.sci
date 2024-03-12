@@ -1,6 +1,6 @@
 function p = sopi_addConstraints(p, cList)
     for c = cList
-        if sopi_isLinear(c)
+        if sopiVar_isLinear(c)
             p = sopi_addLinearConstraint(p, c)
         end
     end
@@ -10,73 +10,59 @@ endfunction
 function p = sopi_addLinearConstraint(p, c)
     vars    = sopi_depends(c.lhs)
     p       = sopi_addVarsToPb(p, vars)
-    if c.operator == '<=' then
-    elseif c.operator == '='
-
+    // A * x <op> b
+    [A, b]  = sopi_extractLinearMatrices(p, c.lhs) 
+    // test if constraint is elementary 
+    [e, alpha, idx] = sopi_isElementary(A)
+    if e then
+        lb = p.lb
+        ub = p.ub
+        select c.operator
+        case '<='
+            for i = 1:length(alpha)
+                // TODO check if associated LB/UB is already affected
+                if alpha(i)>0 then
+                    // upper bound 
+                    ub(idx(i)) = b(i)/alpha(i)
+                else
+                    // lower bound 
+                    lb(idx(i)) = b(i)/alpha(i)
+                end
+            end
+        case '='
+            for i = 1 :length(alpha)
+                ub(idx(i)) = b(i)/alpha(i)
+                lb(idx(i)) = b(i)/alpha(i)
+            end
+        end
+        p.lb = lb
+        p.ub = ub
+        return
     end
-    //   if c.lhs.isElementary then // bound
-    //      if c.type == GREATER_THAN then
-    //         LB          = p.lb;
-    //         varIdx      = p.getVarIdx(vars(1));
-    //         LB(varIdx)  = c.rhs;
-    //         sopi_setVar(p,"lb",LB);
-    //      elseif c.type == LESSER_THAN then
-    //         UB          = p.ub;
-    //         varIdx      = p.getVarIdx(vars(1));
-    //         UB(varIdx)  = c.rhs;
-    //         sopi_setVar(p,"ub",UB);
-    //      end
-    //   else
-    //      [ai,bi]     = sopi_extractLinearConstraintMatrices(p,c.lhs);
-    //      rhs         = c.rhs-bi;
-    //      if c.type == EQUALS then
-    //         Aeq     = [p.Aeq;ai];
-    //         beq     = [p.beq;rhs];
-    //         sopi_setVar(p,"Aeq",Aeq);
-    //         sopi_setVar(p,"beq",beq);
-    //      elseif c.type == LESSER_THAN then
-    //         A       = [p.A;ai];
-    //         b       = [p.b;rhs];
-    //         sopi_setVar(p,"A",A);
-    //         sopi_setVar(p,"b",b);
-    //      elseif c.type == GREATER_THAN then
-    //         A       = [p.A;-ai];
-    //         b       = [p.b;-rhs];
-    //         sopi_setVar(p,"A",A);
-    //         sopi_setVar(p,"b",b);
-    //      end
-    //   end
+    // At this point, the constraint is not elementary 
+    select c.operator
+    case '<='
+        p.A = [p.A;A]
+        p.b = [p.b; b]
+    case '='
+        p.Ae = [p.Ae;A]
+        p.be = [p.be;b]
+    end
+    
 endfunction
 
-function [e, b] = sopi_isElementary(var, bin)
-    e   = %f 
-    b   = []
-    select var.operator 
-    case 'none'
-        e = %t
-        if argn(2) > 1 
-            b = bin 
-        end
-    case 'sum'
-        if length(var.child) > 2 then 
-            e = %f
+function [e, alpha, idx] = sopi_isElementary(A)
+    e       = %f 
+    alpha   = []
+    idx     = []
+    for i = 1:size(A,1)
+        tmp         = find(abs(A(i,:))>0)
+        if length(tmp) > 1
             return
-        end 
-        t = [sopiVar_isConstant(var.child(1)),sopiVar_isConstant(var.child(2))]
-        if or(t) then 
-            ib      = find(t)
-            ie      = find(~t)
-            [e, b] = sopi_isElementary(var.child(ie), var.child(ib))
-        end 
-    case 'llm'
-        if issquare(var.child(1)) & det(var.child(1)) > 1e-10 then
-            e = %t 
-            b = A\bin
-        end 
-    case 'rlm'
-        if issquare(var.child(1)) & det(var.child(1)) > 1e-10 then
-            e = %t
-            b = A/bin
         end
+        idx(i)   = tmp
+        alpha(i) = A(i,tmp)
     end
+    e = %t
 endfunction
+
