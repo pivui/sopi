@@ -26,5 +26,6 @@ c6          = x4 >= 0
 // Problem formulation
 p               = sopi_min(fun, list(c1, c2, c3, c4, c5, c6));
 // Problem resolution
-[xopt, fopt]    = sopi_solve(p,'sopilp');
+[xopt1, fopt1]    = sopi_solve(p,'sopilp');
+[xopt2, fopt2]    = sopi_solve(p,'karmakar');
 ```
