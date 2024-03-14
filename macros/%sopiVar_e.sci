@@ -1,9 +1,9 @@
 
 // field extraction ............................................................
 function out = %sopiVar_e(varargin)
+    var = varargin($)
     select argn(2)
     case 2
-        var = varargin($)
         i   = varargin(1)
         if typeof(i) == 'string' then
             if isfield(var, i) then 
@@ -15,7 +15,6 @@ function out = %sopiVar_e(varargin)
     case 3
         i        = varargin(1)
         j        = varargin(2)
-        var      = varargin(3)
         out       = sopi_extractElement(var,i,j)
     end
 

@@ -42,7 +42,7 @@ function [xopt, fopt, info] = sopi_switchLPSolver(pb,method)
    SOPILP               = "sopiLP"
    // Default choice
    if isempty(method) then
-      method = KARMARKAR;
+      method = 'karmakar';
    end
    sopi_print(0,"Solving problem with : " + method + ".\n")
    //

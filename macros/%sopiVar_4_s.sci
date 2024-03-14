@@ -1,5 +1,12 @@
 // sopiVar >= b ................................................................
-function out = %sopiVar_4_s(var, b)
+function cst = %sopiVar_4_s(var, b)
+    if norm(b) <= %eps then
+        cst             = sopi_constraint()
+        cst.operator    = '<=' 
+        cst.lhs         = -1 * var
+        cst.class       = sopi_applyClassRule('<=',cst.lhs)
+        return 
+    end
     bvar = sopi_constant(b)
-    out = var >= bvar;
+    cst = var >= bvar;
 endfunction
