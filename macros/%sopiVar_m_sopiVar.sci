@@ -5,7 +5,7 @@ function newVar = %sopiVar_m_sopiVar(var1, var2)
     // 
     test = [sopiVar_isConstant(var1), sopiVar_isConstant(var2)]
     if and(test) then
-        newVar          = sopi_var(ns)
+        newVar          = sopi_var(ns(1), ns(2))
         newVar.space    = 'real'
         newVar.operator = 'constant'
         newVar.class    = var1.class 
@@ -33,7 +33,7 @@ endfunction
 function outVar = sopi_propagateLinearMapping(side, ns, A, var)
     if isscalar(A) then
         [m,n]   = size(var)
-        A       = A * speye(ns(1),ns(2))
+        A       = A * speye(ns(1),ns(1))
     end
     select var.operator
     case 'llm'
@@ -41,7 +41,7 @@ function outVar = sopi_propagateLinearMapping(side, ns, A, var)
             var.child(1) = A * var.child(1)
             outVar = var
         else
-            outVar          = sopi_var(ns)
+            outVar          = sopi_var(ns(1),ns(2))
             outVar.space    = 'real'
             outVar.operator = side + 'lm'
             outVar.class    = var.class 
@@ -52,14 +52,14 @@ function outVar = sopi_propagateLinearMapping(side, ns, A, var)
             var.child(1) = var.child(1) * A
             outVar = var
         else
-            outVar          = sopi_var(ns)
+            outVar          = sopi_var(ns(1),ns(2))
             outVar.space    = 'real'
             outVar.operator = side + 'lm'
             outVar.class    = var.class 
             outVar.child    = list(A, var)
         end 
     case 'none'
-        outVar          = sopi_var(ns)
+        outVar          = sopi_var(ns(1),ns(2))
         outVar.space    = 'real'
         outVar.operator = side + 'lm'
         outVar.class    = var.class 
@@ -79,7 +79,7 @@ function outVar = sopi_propagateLinearMapping(side, ns, A, var)
         var.size    = ns
         outVar      = var
     case 'fun'
-        outVar          = sopi_var(ns)
+        outVar          = sopi_var(ns(1),ns(2))
         outVar.space    = 'real'
         outVar.operator = side + 'lm'
         outVar.class    = sopi_applyClassRule('mul', list(sopi_constant(A), var))

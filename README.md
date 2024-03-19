@@ -29,3 +29,26 @@ p               = sopi_min(fun, list(c1, c2, c3, c4, c5, c6));
 [xopt1, fopt1]    = sopi_solve(p,'sopilp');
 [xopt2, fopt2]    = sopi_solve(p,'karmakar');
 ```
+
+### LP-ish
+
+```scilab
+// Data
+n           = 3;
+W           = rand(n,n);
+d           = rand(n,1);
+xMax        = 5*rand(n,1);
+A           = rand(2,n);
+b           = 20*rand(2,1);
+// Problem formulation
+sopi_begin;                                 
+x           = sopi_var(n);                 
+LB          = x >= 0;                      
+UB          = x <= xMax;                   
+ceq         = x(2) == 0.5*xMax(2);         
+ci          = A*x <= b;                    
+fun         = norm(W*(x-d),1);             
+problem     = sopi_min(fun,list(LB,UB,ceq,ci));
+// Problem resolution 
+[xopt, fopt] = sopi_solve(problem);
+```

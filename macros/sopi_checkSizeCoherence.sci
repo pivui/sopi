@@ -1,6 +1,7 @@
 function ns = sopi_checkSizeCoherence(operator, s1, s2)
     select operator
     case 'sum'
+
         ok = isscalar_(s1) | isscalar_(s2) | and(s1 == s2) 
         ns = [max(s1(1),s2(1)), max(s1(2),s2(2))]
     case 'mul'

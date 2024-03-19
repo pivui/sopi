@@ -2,10 +2,22 @@ function c = sopi_applyClassRule(operator, args)
     c = sopi_classCode('nonconvex')
     select (operator)
     case ('sum')
-        c = 0 // zeros(s(1),s(2))
+        cM = -%inf
+        cm = %inf
         for (i=(1:length(args))) do
-            // todo: erreur concave vs convex
-            c = max(c, args(i).class)
+            cM = max(cM, args(i).class)
+            cm = min(cm, args(i).class)
+        end
+        if cm == sopi_classCode('concave') && cM == sopi_classCode('convex') then 
+            return
+        end
+        if cm >= sopi_classCode('constant') then 
+            c = cM
+            return
+        end
+        if cm == sopi_classCode('concave') & cM <= sopi_classCode('linear') then 
+            c = cm
+            return
         end
     case ('mul')
         if abs(args(1).class) > abs(args(2).class)
@@ -17,10 +29,11 @@ function c = sopi_applyClassRule(operator, args)
         end
         Mc = v2.class
         mc = v1.class
-        if Mc == sopi_classCode('linear') then
+
+        if mc == sopi_classCode('constant') & Mc <= sopi_classCode('linear') then
             // constant * linear -> linear
             c = sopi_classCode('linear') 
-        elseif mc == sopi_classCode('constant') & abs(Mc) == sopi_classCode('convex') then 
+        elseif mc == sopi_classCode('constant') & abs(Mc) <= sopi_classCode('convex') then 
             // constant * convex|concave -> depends on the sign
             s = sign(v1.child(1))>=0
             if and(s) then 
@@ -46,7 +59,7 @@ function c = sopi_applyClassRule(operator, args)
         for i = 1:length(args)
             mc = max(mc, args(i).class)
         end
-        if mc == 1 then //f(A*x + b) is convex if f is convex
+        if mc == sopi_classCode('linear') then //f(A*x + b) is convex if f is convex
             c = sopi_classCode('convex')
         end
     case ('concaveFun')
@@ -63,6 +76,8 @@ function c = sopi_applyClassRule(operator, args)
         lhs = args
         if sopiVar_isLinear(lhs)
             c = sopi_classCode('linear')
+        elseif sopiVar_isConvexPWA(lhs)
+            c = sopi_classCode('pwa-convex')
         elseif sopiVar_isConvex(lhs)
             c = sopi_classCode('convex')
         end 
