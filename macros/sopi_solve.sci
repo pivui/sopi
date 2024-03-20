@@ -16,17 +16,17 @@ function  [xopt, fopt] = sopi_solve(pb, varargin)
         error("Unknown class")
     end
     //
-    xopt = sopi_assignOutput(p, xopt) 
+    xopt = sopi_assignOutput(pb, xopt) 
 endfunction
 
 function xo = sopi_assignOutput(p, xopt, fopt)
-    [vIds, vNames] = sopi_whoIsSopiVar()
-    xo = struct()
+    [vIds, vNames]  = sopi_whoIsSopiVar()
+    xo              = struct()
     for i = 1:length(vIds)
         t =  vIds(i) == p.varsId
         if or(t) then
-            idx                 = find(t)
-            xo(vNames(i)) =  xopt(p.varsIdx(idx))
+            idx             = find(t)
+            xo(vNames(i))   =  xopt(p.varsIdx(idx))
 
         end
     end
@@ -42,12 +42,12 @@ function [xopt, fopt, info] = sopi_switchLPSolver(pb,method)
    SOPILP               = "sopiLP"
    // Default choice
    if isempty(method) then
-      method = 'karmakar';
+      method = 'karmarkar';
    end
    sopi_print(0,"Solving problem with : " + method + ".\n")
    //
    select method
-   case 'karmakar' // built-in scilab solver
+   case 'karmarkar' // built-in scilab solver
       tic()
       timer()
       [xopt, fopt, flag]   = karmarkar(full(pb.Ae),full(pb.be),full(pb.c),[],[],[],[],[],full(pb.A),full(pb.b),pb.lb,pb.ub)

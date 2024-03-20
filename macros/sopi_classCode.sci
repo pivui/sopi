@@ -18,9 +18,9 @@ function funClass = sopi_classCode(key, varargin)
             code = 0
         case ('linear')
             code = 1
-        case ('pwa-convex')
+        case ('convex-pwa')
             code = 1.5
-        case ('pwa-concave')
+        case ('concave-pwa')
             code = -1.5
         case ("convex")
             code = 2

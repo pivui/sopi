@@ -67,7 +67,7 @@ function outVar = sopi_propagateLinearMapping(side, ns, A, var)
     case 'sum'
         newChild = list()
         for i = 1:length(var.child)
-            termi           = var.child(i);
+            termi           = var.child(i)
             termi           = sopi_propagateLinearMapping(side, ns, A, termi)
             termi.size      = ns
             newChild($+1)   = termi
@@ -75,7 +75,7 @@ function outVar = sopi_propagateLinearMapping(side, ns, A, var)
         var.child   = newChild
         outVar      = var
     case 'constant'
-        var.child   = sopi_mulfun(side, A, var.child(1))
+        var.child   = list(sopi_mulfun(side, A, var.child(1)))
         var.size    = ns
         outVar      = var
     case 'fun'

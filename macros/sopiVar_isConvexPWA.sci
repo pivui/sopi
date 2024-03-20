@@ -1,5 +1,5 @@
 function ans = sopiVar_isConvexPWA(var)
-    ans = var.class == sopi_classCode('pwa-convex')
+    ans = var.class == sopi_classCode('convex-pwa')
 //   if var.operator=='none'  then
 //
 //   end
