@@ -27,10 +27,12 @@ c6          = x4 >= 0
 p               = sopi_min(fun, list(c1, c2, c3, c4, c5, c6));
 // Problem resolution
 [xopt1, fopt1]    = sopi_solve(p,'sopilp');
-[xopt2, fopt2]    = sopi_solve(p,'karmakar');
+[xopt2, fopt2]    = sopi_solve(p,'karmarkar');
 ```
 
 ### LP-ish
+
+Some problems that involve convex piecewise affine functions can be recast as linear problems by introducing slack variables and specific constraints.
 
 ```scilab
 n           = 3;
