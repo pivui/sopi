@@ -33,7 +33,7 @@ function c = sopi_applyClassRule(operator, args)
         if isempty(wc)
             return
         end
-        if wc == sopi_classCode('linear') then 
+        if wc == sopi_classCode('linear') || wc ==sopi_classCode('convex-pwa') then 
             c = sopi_classCode('convex-pwa')
             return
         end
