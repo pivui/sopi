@@ -3,16 +3,20 @@ function vList = sopi_depends(var)
         var = var.lhs
     end
     vList = list()
-    if var.operator == 'none' then
+
+    select var.operator
+    case 'none' 
         vList(1) = var
-    else
-        select var.operator
-        case {'llm','rlm'}
-            vList = sopi_depends(var.child(2))
-        case 'sum'
-            for v = var.child
-                vList = lstcat(vList, sopi_depends(v))
-            end
+    case {'llm','rlm'}
+        vList = sopi_depends(var.child(2))
+    case 'sum'
+        for v = var.child
+            vList = lstcat(vList, sopi_depends(v))
         end
+    case 'transpose'
+        vList = sopi_depends(var.child(1))
+    case 'mul'
+        vList = lstcat(sopi_depends(var.child(1)), sopi_depends(var.child(2)))
+
     end
 endfunction

@@ -51,8 +51,9 @@ endfunction
 function p = sopi_addLinearConstraint(p, c)
     vars    = sopi_depends(c.lhs)
     p       = sopi_addVarsToPb(p, vars)
-    // A * x <op> b
-    [A, b]  = sopi_extractLinearMatrices(p, c.lhs) 
+    // A * x + b <op> 0
+    [A, b]  = sopi_extractLinearMatrices(c.lhs, p)
+    b       = -b
     // test if constraint is elementary 
     [e, alpha, idx] = sopi_isElementary(A)
     if e then

@@ -15,7 +15,11 @@ function newVar = %sopiVar_m_sopiVar(var1, var2)
     elseif ~test(1) & test(2) then 
         newVar = sopi_propagateLinearMapping('r',ns,var2.child(1), var1)
     else
-        error('Multiplication between sopiVar not yet supported')
+        newVar          = sopi_var(ns(1), ns(2))
+        newVar.space    = 'real'
+        newVar.operator = 'mul'
+        newVar.class    = sopi_applyClassRule('mul', list(var1, var2))
+        newVar.child    = list(var1, var2)
     end
 
 endfunction
@@ -33,11 +37,15 @@ endfunction
 function outVar = sopi_propagateLinearMapping(side, ns, A, var)
     if isscalar(A) then
         [m,n]   = size(var)
-        A       = A * speye(ns(1),ns(1))
+        if side == 'l' then
+            A       = A * speye(ns(1),ns(1))
+        else
+            A = A * speye(ns(2), ns(2)) 
+        end
     end
     select var.operator
     case 'llm'
-        if side == 'L' then
+        if side == 'l' then
             var.child(1) = A * var.child(1)
             outVar = var
         else
@@ -48,7 +56,7 @@ function outVar = sopi_propagateLinearMapping(side, ns, A, var)
             outVar.child    = list(A, var)
         end 
     case 'rlm' 
-        if side == 'R' then
+        if side == 'r' then
             var.child(1) = var.child(1) * A
             outVar = var
         else
@@ -84,5 +92,13 @@ function outVar = sopi_propagateLinearMapping(side, ns, A, var)
         outVar.operator = side + 'lm'
         outVar.class    = sopi_applyClassRule('mul', list(sopi_constant(A), var))
         outVar.child    = list(A, var)
+    case 'transpose'
+//        if side == 'l' then
+//            // A  * x' = (x*A')'
+//            outVar = (var.child(1)*A')' 
+//        else
+//            // x'*A = (A'*x)'
+//            outVar = (A'* var.child(1))'
+//        end      
     end
 endfunction

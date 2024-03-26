@@ -6,7 +6,7 @@ function p = sopi_addFun(p, fun)
         vars    = sopi_depends(fun)
         p       = sopi_addVarsToPb(p, vars)
         //
-        [ct,r]  = sopi_extractLinearMatrices(p, fun)
+        [ct,r]  = sopi_extractLinearMatrices(fun, p)
         p.c     = ct'
         p.r     = r
     elseif sopiVar_isConvexPWA(fun) then

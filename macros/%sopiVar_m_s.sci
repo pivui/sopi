@@ -10,9 +10,9 @@ function newVar = %sopiVar_m_s(var, A)
     Avar            = sopi_constant(A)
     if isscalar(A) then
         // scalar on the left...
-        newVar          = A * var
+        newVar          = Avar * var
     else 
-        newVar          = var * A 
+        newVar          = var * Avar 
     end
 
 endfunction

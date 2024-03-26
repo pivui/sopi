@@ -28,6 +28,10 @@ function c = sopi_applyClassRule(operator, args)
             end
             return
         end
+        if bc == sopi_classCode('linear') & wc == sopi_classCode('linear') then 
+            // linear * linear -> quadratic: extract x'*H*x + test H >=0 
+            
+        end 
     case {'max','abs'}
         wc = sopi_worstClass(args)
         if isempty(wc)
@@ -64,7 +68,7 @@ function c = sopi_applyClassRule(operator, args)
         if wc == sopi_classCode('linear') then 
             c = sopi_classCode('concave')
         end
-        // Constraints ---------------------
+        // Constraints --------------------------------------------------------
     case ('<=')
         // nonconvex until otherwise 
         lhs = args
