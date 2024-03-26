@@ -17,15 +17,12 @@ function [xopt, fopt, flag, info] = sopi_solveLP(c, A, b, Aeq, beq, lb, ub, meth
         [cs, As, bs, T, d]      = sopi_lpToStandardForm(c, A, b, Aeq, beq, lb, ub)
         [xf, ff, flag, info]    = sopi_primalSimplex(cs, As, bs)
         if flag == 0 then
-            xopt                 = T*xf + d
-            fopt                 = c'*xopt
+            xopt                = T*xf + d
+            fopt                = c'*xopt
         else
-            xopt                 = []
-            fopt                 = [] 
+            xopt                = []
+            fopt                = [] 
         end
-        //   case "dual"
-        //   case "ip"
-        //   case "auto"
     else
         error("Unknown LP solver.")
     end

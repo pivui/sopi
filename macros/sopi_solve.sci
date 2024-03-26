@@ -2,9 +2,9 @@
 // is the interface for solving problems
 function  [xopt, fopt] = sopi_solve(pb, varargin)
     if argn(2) >1 then
-        method = varargin(1);
+        method = varargin(1)
     else
-        method = [];
+        method = []
     end
     infoStr = 'Nature of the optimisation problem : '
     select pb.class
@@ -27,22 +27,21 @@ function xo = sopi_assignOutput(p, xopt, fopt)
         if or(t) then
             idx             = find(t)
             xo(vNames(i))   =  xopt(p.varsIdx(idx))
-
         end
     end
 endfunction
 
 // sopi_chooseLPSolver .........................................................
 function [xopt, fopt, info] = sopi_switchLPSolver(pb,method)
-   xopt = [];
-   fopt = [];
+   xopt = []
+   fopt = []
    // Available solvers
-   KARMARKAR            = "karmarkar";
-   LINPRO               = "linpro";
+   KARMARKAR            = "karmarkar"
+   LINPRO               = "linpro"
    SOPILP               = "sopiLP"
    // Default choice
    if isempty(method) then
-      method = 'karmarkar';
+      method = 'karmarkar'
    end
    sopi_print(0,"Solving problem with : " + method + ".\n")
    //
@@ -95,6 +94,6 @@ endfunction
 
 // sopi_interpretFlag ..........................................................
 function vFlag = sopi_interpretFlag(flag, flags,flagMeaning)
-   idx   = find(flag == flags(:,1));
-   vFlag = flagMeaning(idx);
+   idx   = find(flag == flags)
+   vFlag = flagMeaning(idx)
 endfunction
