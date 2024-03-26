@@ -35,6 +35,7 @@ p               = sopi_min(fun, list(c1, c2, c3, c4, c5, c6));
 Some problems that involve convex piecewise affine functions can be recast as linear problems by introducing slack variables and specific constraints.
 
 ```scilab
+sopi_begin;
 n           = 3;
 W           = rand(n,n);
 d           = rand(n,1);
