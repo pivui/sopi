@@ -1,12 +1,12 @@
-
-// sopi_lpSolve ................................................................
-// is the main interface for accessing sopi solvers for linear problems.
-// It is aimed at solving the following linear problems :
-// min  c' x
-//  x
-// s.t. A x <= b
-//      Aeq x = beq
-//      lb <= x <= ub
+// sopi_solveLP ................................................................
+//  Main interface for accessing sopi internal linear problems solvers. 
+//  It is meant to address problems with the following form 
+//
+//          min  c' x
+//           x
+//           s.t.    A   x <= b
+//                   Aeq x = beq
+//                   lb <= x <= ub
 function [xopt, fopt, flag, info] = sopi_solveLP(c, A, b, Aeq, beq, lb, ub, method)
     tic()
     timer()
@@ -54,35 +54,35 @@ endfunction
 // sopi_primalSimplex ..........................................................
 // is a basic form of the two-phases primal simplex method.
 function [xopt, fopt, flag, info] = sopi_primalSimplex(c, A, b)
-    nvar = length(c);
-    xopt = [];
-    fopt = [];
-    info = [];
-    flag = [];
+    nvar = length(c)
+    xopt = []
+    fopt = []
+    info = []
+    flag = []
     // Phase 1 : searching for an initial feasible solution
     sopi_print(1,["sopiLP","Looking for an initial feasible solution (phase 1).\n"])
-    [cp1, Ap1, x0p1, Bp1]   = sopi_standardFormToPhase1(c, A, b);
-    [xoptp1,B,f]            = sopi_simplex(cp1, Ap1, b, x0p1, Bp1);
+    [cp1, Ap1, x0p1, Bp1]   = sopi_standardFormToPhase1(c, A, b)
+    [xoptp1,B,f]            = sopi_simplex(cp1, Ap1, b, x0p1, Bp1)
     if f == -3 then
         // failed to maintain feasibility
         flag = -3
-        return;
+        return
     end
     // Analyse the output of phase 1
     if clean(cp1' * xoptp1) > 0 then // TODO : use a custom precision ?
         sopi_print(1,["sopiLP","No initial feasible solution found.\n"])
         // if the optimal cost is positive then the initial problem is infeasible
-        flag = -1;
+        flag = -1
     else
         sopi_print(1,["sopiLP","Initial feasible solution found.\n"])
         sopi_print(1,["sopiLP","Looking for a optimal solution for the initial LP (phase 2).\n"])
         // Phase 2 : 
         if isempty(intersect(Bp1,B)) then
-            cp2   = c;
-            Ap2   = A;
-            bp2   = b;
-            x0p2  = xoptp1(1:nvar);
-            Bp2   = B;
+            cp2   = c
+            Ap2   = A
+            bp2   = b
+            x0p2  = xoptp1(1:nvar)
+            Bp2   = B
         else
             // TODO : this does not work
             error("slack variable of phase 1 are basics")
@@ -95,85 +95,73 @@ function [xopt, fopt, flag, info] = sopi_primalSimplex(c, A, b)
             //         x0p2  = xoptp1;
             //         Bp2   = B;
         end
-        [xoptp2, B, flag, info]    = sopi_simplex(cp2, Ap2, bp2, x0p2, Bp2);
+        [xoptp2, B, flag, info]    = sopi_simplex(cp2, Ap2, bp2, x0p2, Bp2)
         //
-        xopt                       = clean(xoptp2(1:length(c)));
-        fopt                       = cp2'*xoptp2;
+        xopt                       = clean(xoptp2(1:length(c)))
+        fopt                       = cp2'*xoptp2
     end
 endfunction
 
 // sopi_simplex ................................................................
 // is a basic implementation of the simplex method for lp.
 function [xopt, B, flag, info] = sopi_simplex(c, A, b, x0, B)
-    info = [];
+    info = []
     if norm(A*x0 - b) >= 1e-9 then
         error("[sopi][sopiLP] Provided initial value in not feasible");
     end
-    x          = x0;
-    N          = setdiff(1:size(x,1),B);
+    x          = x0
+    N          = setdiff(1:size(x,1),B)
     //
-    iter        = 0;
-    endSimplex  = %f;
+    iter        = 0
+    endSimplex  = %f
     while ~endSimplex
-        iter  = iter + 1;
+        iter  = iter + 1
         // basic variables
-        xb    = x(B);
-        Ab    = A(:,B);
-        //      Lup   = umf_lufact(Ab);
-        cb    = c(B);
+        xb    = x(B)
+        Ab    = A(:,B)
+        cb    = c(B)
         // non-basic variables
-        xn    = x(N);
-        An    = A(:,N);
-        cn    = c(N);
+        xn    = x(N)
+        An    = A(:,N)
+        cn    = c(N)
         //
-        //      disp(sopi_isInv(Ab))
         if ~sopi_isInv(Ab) then
-            xopt  = x;
-            flag  = -3;
-            break;
+            xopt  = x
+            flag  = -3
+            break
         end
-        // dual variables
-        // TODO : LU factorization of Ab + maintain it
-        //      lambda   = umf_lusolve(Lup,full(cb),"A''x=b");
-        lambda = Ab'\cb;
-        // reduced cost
-        sn       = cn - An'*lambda;
+        lambda  = Ab'\cb            // dual variables
+        sn      = cn - An'*lambda   // reduced cost
         if and(sn >= 0) then 
             // no descent direction left, the basic feasible solution is optimal
-            xopt        = x;
-            flag        = 1;
-            break;
+            xopt    = x
+            flag    = 1
+            break
         end
-        [m, q]         = min(sn)
-        //      isDescentDir   = find( sn < 0 );    // choosing the descent directions
-        //      q              = min(isDescentDir); // smallest index yielding a decrease in the cost
-        aq             = An(:,q);
-        //      d              = - umf_lusolve(Lup,aq);        // selected descent direction
-        d              = -Ab\aq;
+        // Choosing the descend direction, q is the index yelding the largest decrease in the cost
+        [m, q]  = min(sn)
+        aq      = An(:,q)
+        d       = -Ab\aq
         if and(d >= 0) then // the problem is unbounded below
-            xopt = [];
-            flag = -2;
-            break;
+            xopt = []
+            flag = -2
+            break
         end
-        idDescent      = find(d < 0);
-        stepCandidates = xb(idDescent) ./ -d(idDescent);
-        [alpha,id]     = min(stepCandidates);
-        //      candidateID    = find(alpha == stepCandidates);
-        //      p              = min(idDescent(candidateID));
-        p              = idDescent(id);
+        idDescent      = find(d < 0)
+        stepCandidates = xb(idDescent) ./ -d(idDescent)
+        [alpha,id]     = min(stepCandidates)
+        p              = idDescent(id)
         // next iterate
-
-        x(B)           = x(B) + alpha * d;
-        x(N(q))        = alpha; 
+        x(B)           = x(B) + alpha * d
+        x(N(q))        = alpha
         // q is the entering basic variable and p is the leaving variable
-        entering       = N(q);
-        leaving        = B(p);
-        B(p)           = entering;
-        N(q)           = leaving;
+        entering       = N(q)
+        leaving        = B(p)
+        B(p)           = entering
+        N(q)           = leaving
     end
-    info.nIter = iter;
+    info.nIter = iter
 endfunction
-
 // ============================================================================
 // LP FORMS
 // ============================================================================
@@ -194,11 +182,11 @@ function [cout, Aout, bout, T, d] = sopi_lpToStandardForm(c, A, b, Aeq, beq, lb,
     xAreUB(iub)             = []
     // Variables which are only lower bounded :
     // x >= lb is shifted and replaced by y = x - lb >=0
-    firstLoop = %t;
+    firstLoop = %t
     for idx = xAreLB
         if firstLoop then
             sopi_print(2,["sopiLP","Lower bounded variables transformation.\n"])
-            firstLoop = %f;
+            firstLoop = %f
         end
         if ~isempty(A)
             colA                = A(:,idx)
@@ -210,121 +198,121 @@ function [cout, Aout, bout, T, d] = sopi_lpToStandardForm(c, A, b, Aeq, beq, lb,
         end
         //
         T(idx,idx)          = 1
-        d(idx)              = lb(idx);
+        d(idx)              = lb(idx)
     end
-    xArePositive = xAreLB;
+    xArePositive = xAreLB
     // Variables which are only upper bounded :
     // x <= ub is replaced by y = -x+ub >=0
-    firstLoop = %t;
+    firstLoop = %t
     for idx = xAreUB
         if firstLoop then
             sopi_print(2,["sopiLP","Upper bounded variables transformation.\n"])
-            firstLoop = %f;
+            firstLoop = %f
         end        
         if ~isempty(A)
-            colA                = A(:,idx);
-            b                   = b - colA*ub(idx);
-            A(:,idx)            = -colA;
+            colA                = A(:,idx)
+            b                   = b - colA*ub(idx)
+            A(:,idx)            = -colA
         end
         if ~isempty(Aeq)
-            colAeq              = Aeq(:,idx);
-            beq                 = beq - colAeq*ub(idx);
-            Aeq(:,idx)          = -colAeq;
+            colAeq              = Aeq(:,idx)
+            beq                 = beq - colAeq*ub(idx)
+            Aeq(:,idx)          = -colAeq
         end
-        c(idx)              = -c(idx);
+        c(idx)              = -c(idx)
         //
         T(idx,idx)          = -1
-        d(idx)              = ub(idx);
+        d(idx)              = ub(idx)
     end
-    xArePositive = [xArePositive,xAreUB];
+    xArePositive = [xArePositive,xAreUB]
     // Variables which are box bounded : the lb is transformed as above and the ub
     // is added as a linear inequality constraint
     firstLoop = %t;
     for  idx = xAreLUB
         if firstLoop then
             sopi_print(2,["sopiLP","Upper and lower bounded variables transformation.\n"])
-            firstLoop = %f;
+            firstLoop = %f
         end
         if ~isempty(A) then 
-            colA                = A(:,idx);
-            b                   = b - colA*lb(idx);
+            colA                = A(:,idx)
+            b                   = b - colA*lb(idx)
         end
         if ~isempty(Aeq)
-            colAeq              = Aeq(:,idx);
-            beq                 = beq - colAeq*lb(idx);
+            colAeq              = Aeq(:,idx)
+            beq                 = beq - colAeq*lb(idx)
         end
         //
         T(idx,idx)          = 1
-        d(idx)              = lb(idx);
+        d(idx)              = lb(idx)
         // adding the lic
-        A                 = [A;T(idx,:)];
-        b                 = [b;ub(idx)-lb(idx)];
+        A                 = [A;T(idx,:)]
+        b                 = [b;ub(idx)-lb(idx)]
     end
     xArePositive = [xArePositive,xAreLUB];
     // Each bounded var has been treated, now the unrestricted var
     // if x is unrestricted, it is replaced by x = x+ - x-,  x+ >=0 and x->=0
     if length(xArePositive) < nvar then
         sopi_print(2,["sopiLP","Unrestricted variables transformation.\n"])
-        tmp                 = (1:nvar);
-        tmp(xArePositive)   = [];
-        unrestrictedVar     = tmp;
+        tmp                 = (1:nvar)
+        tmp(xArePositive)   = []
+        unrestrictedVar     = tmp
         for idx = unrestrictedVar
             T(idx,idx)  = 1;
-            c           = [c  ;   c(idx)      ;   -c(idx)];
-            A           = [A  ,   A(:,idx)    ,   -A(:,idx)];
-            Aeq         = [Aeq,   Aeq(:,idx)  ,   -Aeq(:,idx)];
-            T           = [T  ,   T(:,idx)    ,   -T(:,idx)];
+            c           = [c  ;   c(idx)      ;   -c(idx)]
+            A           = [A  ,   A(:,idx)    ,   -A(:,idx)]
+            Aeq         = [Aeq,   Aeq(:,idx)  ,   -Aeq(:,idx)]
+            T           = [T  ,   T(:,idx)    ,   -T(:,idx)]
         end
-        c(unrestrictedVar)        = [];
-        A(:,unrestrictedVar)      = [];
-        Aeq(:,unrestrictedVar)    = [];
-        T(:,unrestrictedVar)      = [];
+        c(unrestrictedVar)        = []
+        A(:,unrestrictedVar)      = []
+        Aeq(:,unrestrictedVar)    = []
+        T(:,unrestrictedVar)      = []
     end
     // Transformation of other linear inequalities
     // positive slack variables are added to the problem
-    nvar            = length(c);
-    ni              = size(A,1);
-    slackSign       = zeros(ni,1);
-    newAeqRows      = sparse([],[],[ni,nvar]);
+    nvar            = length(c)
+    ni              = size(A,1)
+    slackSign       = zeros(ni,1)
+    newAeqRows      = sparse([],[],[ni,nvar])
     for i = 1:ni
         if b(i) >= 0 then
             // ai' x <= bi  with bi >= 0
             // becomes ai' x + z = bi
-            newAeqRows(i,:) = A(i,:);
-            slackSign(i)    = 1;
+            newAeqRows(i,:) = A(i,:)
+            slackSign(i)    = 1
         else
             // ai' x <= bi with bi <= 0 
             // becomes -ai' x - z = -bi >= 0
-            newAeqRows(i,:) = -A(i,:);
-            b(i)            = -b(i);
-            slackSign(i)    = -1;
+            newAeqRows(i,:) = -A(i,:)
+            b(i)            = -b(i)
+            slackSign(i)    = -1
         end
     end
-    cout    = [c;sparse([],[],[ni,1])];
-    Aout    = [Aeq      ,   sparse([],[],[size(Aeq,1),ni]);
-    newAeqRows ,   diag(slackSign)   ];
-    bout    = [beq;b];
-    T       = [T,sparse([],[],[size(T,1),ni])];
+    cout    = [c;sparse([],[],[ni,1])]
+    Aout    = [Aeq      ,   sparse([],[],[size(Aeq,1),ni])
+               newAeqRows ,   diag(slackSign)   ]
+    bout    = [beq;b]
+    T       = [T,sparse([],[],[size(T,1),ni])]
 endfunction
 
 
 // sopi_standardFormToPhase1 ...................................................
 function [cp1, Ap1, x0p1, Bp1] = sopi_standardFormToPhase1(c, A, b)
-    ne                = size(A,1);
-    nvar              = size(A,2);
+    ne                = size(A,1)
+    nvar              = size(A,2)
     // adding slack variables z representing distance to infeasibility
-    D                 = zeros(ne,1);
-    D(b >= 0)         = 1;
-    D(b < 0)          = -1;
+    D                 = zeros(ne,1)
+    D(b >= 0)         = 1
+    D(b < 0)          = -1
     // Ax = b becomes Ax + D*z = b
     Ap1               = [A, sparse(diag(D))]
     // c'x becomes e'z (with e = 1)
     cp1               = zeros(size(Ap1,2),1)
-    cp1(nvar+1:$)     = 1;
+    cp1(nvar+1:$)     = 1
     // x = 0, z = abs(b) is a feasible initial point for this problem
-    x0p1              = [zeros(nvar,1) ; abs(b)];
+    x0p1              = [zeros(nvar,1) ; abs(b)]
     // corresponding basis
-    Bp1               = nvar + 1 : nvar + ne;
+    Bp1               = nvar + 1 : nvar + ne
 endfunction
 
 function out = sopi_isInv(A)
@@ -339,8 +327,8 @@ function out = sopi_isInv(A)
     c = cond(full(A))
     //   end
     if  c < 1/(%eps) then
-        out = %t;
+        out = %t
     else
-        out = %f;
+        out = %f
     end
 endfunction
