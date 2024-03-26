@@ -53,13 +53,17 @@ function [xopt, fopt, info] = sopi_switchLPSolver(pb,method)
       [xopt, fopt, flag]   = karmarkar(full(pb.Ae),full(pb.be),full(pb.c),[],[],[],[],[],full(pb.A),full(pb.b),pb.lb,pb.ub)
       info.elapsedTime     = toc()
       info.cpuTime         = timer()
-      flagMeaning          = ["1","The algorithm has converged.\n",
-                              "0","Maximum number of iterations reached.\n",
-                             "-1","No feasible point has been found.\n",
-                             "-2","The problem is unbounded.\n",
-                             "-3","Search direction became 0.\n",
-                             "-4","Algorithm stopped on user request.\n"]
-      info.vFlag           = ["karmarkar",sopi_interpretFlag(flag,flagMeaning)]
+      flags                 = [1, 0, -1, -2, -3, -4]
+      flagMeaning          = ["The algorithm has converged.\n",
+                              "Maximum number of iterations reached.\n",
+                             "No feasible point has been found.\n",
+                             "The problem is unbounded.\n",
+                             "Search direction became 0.\n",
+                             "Algorithm stopped on user request.\n"]
+      info.vFlag           = ["karmarkar",sopi_interpretFlag(flag, flags, flagMeaning)]
+      if flag == 1 then 
+          flag = 0
+      end
    case 'linpro' // from external module quapro
       sopi_testIfInstalled("linpro","To use the solver linpro, the quapro module must be installed. You can get it from the atoms portal.")
       tic()
@@ -82,7 +86,7 @@ function [xopt, fopt, info] = sopi_switchLPSolver(pb,method)
       [xopt, fopt, flag, info] = sopi_solveLP(pb.c, pb.A, pb.b, pb.Ae, pb.be, pb.lb, pb.ub, "primal")
    end
    // Display a warning if the algorithm has not really converged
-   if flag == 1
+   if flag == 0
       sopi_print(0,info.vFlag)
    else
       sopi_print(-1,info.vFlag)
@@ -90,7 +94,7 @@ function [xopt, fopt, info] = sopi_switchLPSolver(pb,method)
 endfunction
 
 // sopi_interpretFlag ..........................................................
-function vFlag = sopi_interpretFlag(flag,flagMeaning)
-   idx   = find(flag == flagMeaning(:,1));
-   vFlag = flagMeaning(idx,2);
+function vFlag = sopi_interpretFlag(flag, flags,flagMeaning)
+   idx   = find(flag == flags(:,1));
+   vFlag = flagMeaning(idx);
 endfunction
