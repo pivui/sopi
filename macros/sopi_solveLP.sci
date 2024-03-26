@@ -16,7 +16,7 @@ function [xopt, fopt, flag, info] = sopi_solveLP(c, A, b, Aeq, beq, lb, ub, meth
         // T and d are the transformation matrices such that x_old = T*x_new + d
         [cs, As, bs, T, d]      = sopi_lpToStandardForm(c, A, b, Aeq, beq, lb, ub)
         [xf, ff, flag, info]    = sopi_primalSimplex(cs, As, bs)
-        if flag >= 0 then
+        if flag == 0 then
             xopt                 = T*xf + d
             fopt                 = c'*xopt
         else
@@ -30,15 +30,15 @@ function [xopt, fopt, flag, info] = sopi_solveLP(c, A, b, Aeq, beq, lb, ub, meth
         error("Unknown LP solver.")
     end
     select flag
-    case 1
-        verboseFlag = ["sopiLP","The algorithm has converged.\n"]
     case 0
+        verboseFlag = ["sopiLP","The algorithm has converged.\n"]
+    case 1
         verboseFlag = ["sopiLP","Maximum number of iterations reached.\n"]
-    case -1
+    case 2
         verboseFlag = ["sopiLP","No feasible solution found.\n"]
-    case -2
+    case 3
         verboseFlag = ["sopiLP","The problem is unbounded below.\n"]
-    case -3
+    case 4
         verboseFlag = ["sopiLP","Failed to maintain feasibility.\n"]
     end   
     info.vFlag        = verboseFlag
@@ -63,16 +63,16 @@ function [xopt, fopt, flag, info] = sopi_primalSimplex(c, A, b)
     sopi_print(1,["sopiLP","Looking for an initial feasible solution (phase 1).\n"])
     [cp1, Ap1, x0p1, Bp1]   = sopi_standardFormToPhase1(c, A, b)
     [xoptp1,B,f]            = sopi_simplex(cp1, Ap1, b, x0p1, Bp1)
-    if f == -3 then
+    if f == 3 then
         // failed to maintain feasibility
-        flag = -3
+        flag = 3
         return
     end
     // Analyse the output of phase 1
     if clean(cp1' * xoptp1) > 0 then // TODO : use a custom precision ?
         sopi_print(1,["sopiLP","No initial feasible solution found.\n"])
         // if the optimal cost is positive then the initial problem is infeasible
-        flag = -1
+        flag = 2
     else
         sopi_print(1,["sopiLP","Initial feasible solution found.\n"])
         sopi_print(1,["sopiLP","Looking for a optimal solution for the initial LP (phase 2).\n"])
@@ -127,7 +127,7 @@ function [xopt, B, flag, info] = sopi_simplex(c, A, b, x0, B)
         //
         if ~sopi_isInv(Ab) then
             xopt  = x
-            flag  = -3
+            flag  = 4
             break
         end
         lambda  = Ab'\cb            // dual variables
@@ -135,7 +135,7 @@ function [xopt, B, flag, info] = sopi_simplex(c, A, b, x0, B)
         if and(sn >= 0) then 
             // no descent direction left, the basic feasible solution is optimal
             xopt    = x
-            flag    = 1
+            flag    = 0
             break
         end
         // Choosing the descend direction, q is the index yelding the largest decrease in the cost
@@ -144,7 +144,7 @@ function [xopt, B, flag, info] = sopi_simplex(c, A, b, x0, B)
         d       = -Ab\aq
         if and(d >= 0) then // the problem is unbounded below
             xopt = []
-            flag = -2
+            flag = 3
             break
         end
         idDescent      = find(d < 0)

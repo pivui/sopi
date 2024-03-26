@@ -56,7 +56,9 @@ function [xopt, fopt, info] = sopi_switchLPSolver(pb,method)
       flagMeaning          = ["1","The algorithm has converged.\n",
                               "0","Maximum number of iterations reached.\n",
                              "-1","No feasible point has been found.\n",
-                             "-2","The problem is unbounded.\n"]
+                             "-2","The problem is unbounded.\n",
+                             "-3","Search direction became 0.\n",
+                             "-4","Algorithm stopped on user request.\n"]
       info.vFlag           = ["karmarkar",sopi_interpretFlag(flag,flagMeaning)]
    case 'linpro' // from external module quapro
       sopi_testIfInstalled("linpro","To use the solver linpro, the quapro module must be installed. You can get it from the atoms portal.")
