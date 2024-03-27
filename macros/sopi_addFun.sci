@@ -6,9 +6,9 @@ function p = sopi_addFun(p, fun)
         vars    = sopi_depends(fun)
         p       = sopi_addVarsToPb(p, vars)
         //
-        [ct,r]  = sopi_extractLinearMatrices(fun, p)
-        p.c     = ct'
-        p.r     = r
+        lm      = sopi_getLinearMapping(fun, p)
+        p.c     = lm.A'
+        p.r     = lm.b
     elseif sopiVar_isConvexPWA(fun) then
         // CPWA is turned into linear objective + linear constraints 
         [newFun, newCons]   = sopi_convexToEpigraph(fun)

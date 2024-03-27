@@ -1,4 +1,4 @@
-function [A, b] = sopi_extractLinearMatrices(var, p)
+function [A, b] = sopi_extractLinearMatrices_(var, p)
     //  
     if argn(2) < 2 then
         // create dummy problem for storing variables indexes 
