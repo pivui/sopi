@@ -74,7 +74,7 @@ function [L, R, B] = sopi_getLinearMapping_(var, vList, L, R, B)
         //
         nextVar = var.child(2)
         Bi = zeros(size(nextVar,1),size(nextVar,2))
-        [L, R, Bi]  = sopi_getLinearMapping_(nextvar, vList, L, R, Bi)
+        [L, R, Bi]  = sopi_getLinearMapping_(nextVar, vList, L, R, Bi)
         //
         ivL = sopi_depends(var.child(2))
         for v = ivL 

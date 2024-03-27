@@ -13,6 +13,9 @@ function ns = sopi_checkSizeCoherence(operator, s1, s2)
       else
          ns = [s1(1), s2(2)]
       end
+  case 'hadamard'
+      ok = and(s1 == s2) 
+      ns = s1
     end
 
     if ~ok then
