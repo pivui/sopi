@@ -70,7 +70,6 @@ function c = sopi_applyClassRule(operator, args)
         end
         // Constraints --------------------------------------------------------
     case ('<=')
-        // nonconvex until otherwise 
         lhs = args
         if sopiVar_isLinear(lhs)
             c = sopi_classCode('linear')
