@@ -5,17 +5,23 @@ function ns = sopi_checkSizeCoherence(operator, s1, s2)
         ok = isscalar_(s1) | isscalar_(s2) | and(s1 == s2) 
         ns = [max(s1(1),s2(1)), max(s1(2),s2(2))]
     case 'mul'
-      ok = isscalar_(s1) | isscalar_(s2) | s1(2) == s2(1)
-      if isscalar_(s1) then
-         ns = s2
-      elseif isscalar_(s2) then
-         ns = s1
-      else
-         ns = [s1(1), s2(2)]
-      end
-  case 'hadamard'
-      ok = and(s1 == s2) 
-      ns = s1
+        ok = isscalar_(s1) | isscalar_(s2) | s1(2) == s2(1)
+        if isscalar_(s1) then
+            ns = s2
+        elseif isscalar_(s2) then
+            ns = s1
+        else
+            ns = [s1(1), s2(2)]
+        end
+    case 'hadamard'
+        ok = and(s1 == s2) 
+        ns = s1
+    case 'hcat'
+        ok = s1(1) == s2(1)
+        ns = [s1(1), s1(2) + s2(2)]
+    case 'vcat'
+        ok = s1(2) == s2(2)
+        ns = [s1(1) + s2(1), s1(2)]
     end
 
     if ~ok then
