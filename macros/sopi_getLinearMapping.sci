@@ -1,4 +1,4 @@
-function  lm = sopi_getLinearMapping(var, p)
+function  lm = sopi_getLinearMapping(var, vList, p)
     //
     if ~sopiVar_isLinear(var) then
         error('Cannot extract linear mapping from variable which is not a linear function')
@@ -6,23 +6,26 @@ function  lm = sopi_getLinearMapping(var, p)
     L           = list()
     R           = list()
     B           = zeros(size(var,1),size(var,2))
-    vList       = sopi_depends(var)
+    if argn(2)<2 || isempty(vList) then
+        vList       = sopi_depends(var)
+    end
     for i = 1:length(vList)
         L($+1) = 0
         R($+1) = 0
     end
     [L, R, B]   = sopi_getLinearMapping_(var, vList, L, R, B)
     //
-    if argn(2) == 1 then
+    if argn(2) < 3 then
         // Decompose var as:
         //
         //  var =  B + SUM_i L(i) * X(i) * R(i) 
         //
         // where X(i) are the elementary variables
         //
-        lm.L = L
-        lm.R = R
-        lm.B = B
+        lm.L    = L
+        lm.R    = R
+        lm.B    = B
+        lm.vars = vList
     else
         // Converts to vectorised form 
         //
@@ -49,7 +52,9 @@ function [L, R, B] = sopi_getLinearMapping_(var, vList, L, R, B)
         [inList, i] = sopi_varInList(var, vList)
         [m, n]      = size(var)
         L(i)        = L(i) + speye(m, m)
-        R(i)        = R(i) + speye(n, n)
+        if norm(R(i)) == 0 then
+            R(i)        = speye(n, n)
+        end
     case 'constant'
         B           = B + var.child(1)
     case 'sum'

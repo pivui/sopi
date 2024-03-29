@@ -52,7 +52,7 @@ function p = sopi_addLinearConstraint(p, c)
     vars    = sopi_depends(c.lhs)
     p       = sopi_addVarsToPb(p, vars)
     // A * x + b <op> 0
-    lm  = sopi_getLinearMapping(c.lhs, p)
+    lm  = sopi_getLinearMapping(c.lhs, [], p)
     A   = lm.A
     b   = -lm.b
     // test if constraint is elementary 

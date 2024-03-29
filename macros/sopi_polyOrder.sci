@@ -11,7 +11,7 @@ function r = sopi_polyOrder(var)
         end 
         r = max(rs)
     case {'rlm','llm'}
-        r = sopi_polyOrder(var.child(1))
+        r = sopi_polyOrder(var.child(2))
     case 'mul'
         r = sopi_polyOrder(var.child(1)) + sopi_polyOrder(var.child(2))
     case 'transpose'

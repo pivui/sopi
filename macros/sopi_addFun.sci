@@ -6,7 +6,7 @@ function p = sopi_addFun(p, fun)
         vars    = sopi_depends(fun)
         p       = sopi_addVarsToPb(p, vars)
         //
-        lm      = sopi_getLinearMapping(fun, p)
+        lm      = sopi_getLinearMapping(fun, [], p)
         p.c     = lm.A'
         p.r     = lm.b
     elseif sopiVar_isConvexPWA(fun) then

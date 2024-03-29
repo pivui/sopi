@@ -11,12 +11,12 @@ function vList = sopi_depends(var)
         vList = sopi_depends(var.child(2))
     case 'sum'
         for v = var.child
-            vList = lstcat(vList, sopi_depends(v))
+            vList = sopi_varsUnion(vList, sopi_depends(v))
         end
     case 'transpose'
         vList = sopi_depends(var.child(1))
     case 'mul'
-        vList = lstcat(sopi_depends(var.child(1)), sopi_depends(var.child(2)))
+        vList = sopi_varsUnion(sopi_depends(var.child(1)), sopi_depends(var.child(2)))
 
     end
 endfunction
