@@ -18,7 +18,7 @@ function newVar = %sopiVar_a_sopiVar(var1, var2)
     //
     newVar.child    = terms//sopi_gatherConstants(terms)
     //
-    newVar.class    = sopi_applyClassRule('sum', newVar.child) 
+    newVar.class    = sopi_classRules('sum', newVar.child) 
 endfunction
 
 

@@ -12,8 +12,8 @@ function var = sopi_var(s1, varargin)
     var.id_         = sopi_getNewId()
     var.size        = s
     var.space       = 'real'
-    var.class       = sopi_classCode("linear", s(1), s(2))
     var.operator    = 'none'
+    var.class       = sopi_class('poly', 1)
     var.child       = list()
 endfunction
 

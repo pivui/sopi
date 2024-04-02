@@ -4,7 +4,7 @@ function out = %s_4_sopiVar(b, var)
         cst             = sopi_constraint()
         cst.operator    = '<=' 
         cst.lhs         = var
-        cst.class       = sopi_applyClassRule('<=',cst.lhs)
+        cst.class       = sopi_classRules('<=',cst.lhs)
         return 
     end
     bvar = sopi_constant(b)

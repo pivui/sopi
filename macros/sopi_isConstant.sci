@@ -1,3 +1,3 @@
-function out = sopiVar_isConstant(p)
+function out = sopi_isConstant(p)
     out = p.operator == 'constant'
 endfunction

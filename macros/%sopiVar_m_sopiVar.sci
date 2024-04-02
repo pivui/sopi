@@ -3,7 +3,7 @@ function newVar = %sopiVar_m_sopiVar(var1, var2)
     // check sizes
     ns              = sopi_checkSizeCoherence('mul', var1.size, var2.size)
     // 
-    test = [sopiVar_isConstant(var1), sopiVar_isConstant(var2)]
+    test = [sopi_isConstant(var1), sopi_isConstant(var2)]
     if and(test) then
         newVar          = sopi_var(ns(1), ns(2))
         newVar.space    = 'real'
@@ -18,7 +18,7 @@ function newVar = %sopiVar_m_sopiVar(var1, var2)
         newVar          = sopi_var(ns(1), ns(2))
         newVar.space    = 'real'
         newVar.operator = 'mul'
-        newVar.class    = sopi_applyClassRule('mul', list(var1, var2))
+        newVar.class    = sopi_classRules('mul', list(var1, var2))
         newVar.child    = list(var1, var2)
     end
 
@@ -90,15 +90,7 @@ function outVar = sopi_propagateLinearMapping(side, ns, A, var)
         outVar          = sopi_var(ns(1),ns(2))
         outVar.space    = 'real'
         outVar.operator = side + 'lm'
-        outVar.class    = sopi_applyClassRule('mul', list(sopi_constant(A), var))
-        outVar.child    = list(A, var)
-    case 'transpose'
-//        if side == 'l' then
-//            // A  * x' = (x*A')'
-//            outVar = (var.child(1)*A')' 
-//        else
-//            // x'*A = (A'*x)'
-//            outVar = (A'* var.child(1))'
-//        end      
+        outVar.class    = sopi_classRules('mul', list(sopi_constant(A), var))
+        outVar.child    = list(A, var)      
     end
 endfunction

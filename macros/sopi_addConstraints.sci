@@ -1,8 +1,8 @@
 function p = sopi_addConstraints(p, cList)
     for c = cList
-        if sopiVar_isLinear(c)
+        if sopi_isLinear(c)
             p = sopi_addLinearConstraint(p, c)
-        elseif sopiVar_isConvexPWA(c)
+        elseif sopi_isConvexPWA(c)
             [newVar, newCons]   = sopi_convexPWA2Linear(c.lhs)
             p                   = sopi_addVarsToPb(p, list(newVar))
             p                   = sopi_addConstraints(p, lstcat(newVar <= 0, newCons))

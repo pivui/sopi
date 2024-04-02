@@ -2,14 +2,14 @@ function p = sopi_addFun(p, fun)
     if size(fun,'*')>1 then
         error('Multi-objective optimisation is not handled')
     end
-    if sopiVar_isLinear(fun) then
+    if sopi_isLinear(fun) then
         vars    = sopi_depends(fun)
         p       = sopi_addVarsToPb(p, vars)
         //
         lm      = sopi_getLinearMapping(fun, [], p)
         p.c     = lm.A'
         p.r     = lm.b
-    elseif sopiVar_isConvexPWA(fun) then
+    elseif sopi_isConvexPWA(fun) then
         // CPWA is turned into linear objective + linear constraints 
         [newFun, newCons]   = sopi_convexToEpigraph(fun)
         //
