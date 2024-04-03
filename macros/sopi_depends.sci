@@ -7,8 +7,6 @@ function vList = sopi_depends(var)
     select var.operator
     case 'none' 
         vList(1) = var
-    case {'llm','rlm'}
-        vList = sopi_depends(var.child(2))
     case 'sum'
         for v = var.child
             vList = sopi_varsUnion(vList, sopi_depends(v))

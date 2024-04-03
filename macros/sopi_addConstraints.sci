@@ -11,10 +11,18 @@ function p = sopi_addConstraints(p, cList)
 endfunction
 
 function [newVar, newC] = sopi_convexPWA2Linear(var)
+    if sopi_isConstant(var) | sopi_isLinear(var) then
+        newVar  = var 
+        newC    = list()
+        return 
+    end
+    //
     select var.operator 
-    case 'llm'
-      [newV,newC]   = sopi_convexPWA2Linear(var.child(2))
-      newVar        = var.child(1) * newV
+    case 'mul'
+        [newV1,newC1]   = sopi_convexPWA2Linear(var.child(1))
+        [newV2,newC2]   = sopi_convexPWA2Linear(var.child(2))
+        newVar          = newV1 * newV2
+        newC            = lstcat(newC1, newC2)
     case 'sum'
         [newVar,newC]  =  sopi_convexPWA2Linear(var.child(1))
         for i = 2:length(var.child)
@@ -23,28 +31,25 @@ function [newVar, newC] = sopi_convexPWA2Linear(var)
             newC           = lstcat(newC,newCi)
         end
     case 'fun'
-        select var.child(1)
+        select var.subop
         case 'abs'
             [m, n]          = size(var)
             slackVar        = sopi_var(m, n)
-            [newV, newC]    = sopi_convexPWA2Linear(var.child(2)(1))
-            newC($+1)       = slackVar >= 0 
+            [newV, newC]    = sopi_convexPWA2Linear(var.child(1))
+            newC($+1)       =  slackVar >= 0 
             newC($+1)       =  slackVar >= newV
             newC($+1)       = -slackVar <= newV
-            newVar          = slackVar
+            newVar          =  slackVar
         case 'max'
             slackVar = sopi_var(1)
             newC = list()
-            for i = 1:length(var.child(2))
-                [newVi, newCi]  = sopi_convexPWA2Linear(var.child(2)(i))
+            for i = 1:length(var.child)
+                [newVi, newCi]  = sopi_convexPWA2Linear(var.child(i))
                 newC            = lstcat(newC,newCi)
                 newC($+1)       = newVi <= slackVar
             end
             newVar = slackVar
         end
-    else
-        newVar  = var
-        newC    = list()
     end
 endfunction
 

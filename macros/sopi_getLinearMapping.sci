@@ -3,91 +3,85 @@ function  lm = sopi_getLinearMapping(var, vList, p)
     if ~sopi_isLinear(var) then
         error('Cannot extract linear mapping from variable which is not a linear function')
     end
-    L           = list()
-    R           = list()
     B           = zeros(size(var,1),size(var,2))
     if argn(2)<2 || isempty(vList) then
         vList       = sopi_depends(var)
     end
-    for i = 1:length(vList)
-        L($+1) = 0
-        R($+1) = 0
-    end
-    [L, R, B]   = sopi_getLinearMapping_(var, vList, L, R, B)
+    [ids, L, R, B]   = sopi_getLinearMapping_(var, vList, list(), list(), list(), B)
     //
     if argn(2) < 3 then
         // Decompose var as:
         //
-        //  var =  B + SUM_i L(i) * X(i) * R(i) 
+        //  var =  B + SUM_t L(t) * X(it) * R(t) with it in ids
         //
         // where X(i) are the elementary variables
         //
         lm.L    = L
         lm.R    = R
         lm.B    = B
+        lm.ids  = ids
         lm.vars = vList
     else
         // Converts to vectorised form 
         //
         //  vec(var) = vec(B) + SUM_i kron(R(i)', L(i)) * vec(X(i))
         //
-        A = sparse([],[],[size(var,'*'), p.nvar])
-        for i = 1:length(vList)
-            vi      = vList(i)
-            idxVar  = sopi_varIdxInPb(p, vi)
-            if isempty(idxVar)
-                error('Variable is not in problem')
+        [m,n]   = size(var)
+//        A       = sparse([],[],[size(var,'*'), p.nvar])
+        A       = zeros(m*n, p.nvar)
+        for k = 1:m
+            for l = 1:n 
+                //
+                t = (l-1) *m + k
+                for i = 1:length(ids)
+                    // ek' * L(t) * X(it) * R(t) * el
+                    idxVari         = sopi_varIdxInPb(p, vList(ids(i)))
+                    A(t,idxVari)    = A(t, idxVari)  + kron(R(i)(:,l)', L(i)(k,:))
+                end
             end
-            // Li * Xi * Ri => kron(Ri', Li) * vec(Xi)
-            A(:,idxVar) = A(:,idxVar) + sparse(kron(R(i)', L(i)))
         end
         lm.A = A
         lm.b = B(:)
     end
 endfunction
 
-function [L, R, B] = sopi_getLinearMapping_(var, vList, L, R, B)
+function [ids, L, R, B] = sopi_getLinearMapping_(var, vList, ids, L, R, B)
+    n = length(vList)
     select var.operator
     case 'none'
         [inList, i] = sopi_varInList(var, vList)
         [m, n]      = size(var)
-        L(i)        = L(i) + speye(m, m)
-        if norm(R(i)) == 0 then
-            R(i)        = speye(n, n)
-        end
+        ids($+1)    = i
+        L($+1)      = eye(m,m)
+        R($+1)      = eye(n,n)
     case 'constant'
         B           = B + var.child(1)
     case 'sum'
         for i = 1:length(var.child)
-            [L, R, B] = sopi_getLinearMapping_(var.child(i), vList, L, R, B)
+            [ids, L, R, B] = sopi_getLinearMapping_(var.child(i), vList, ids, L, R, B)
         end
-    case 'llm'
-        A   = var.child(1)
-        //
-        nextVar = var.child(2)
-        Bi = zeros(size(nextVar,1),size(nextVar,2))
-        [L, R, Bi] = sopi_getLinearMapping_(nextVar, vList, L, R, Bi)
-        //
-        ivL = sopi_depends(var.child(2))
-        for v = ivL
-            [dummy, i]  = sopi_varInList(v, vList)
-            L(i)        = A * L(i)
+    case 'mul'
+        // (sum_i L1i Xi R1i + B1) (sum_i L2j Xj R2j + B2) , one Xi/Xj is 0 each time
+        [id1, L1, R1, B1] = sopi_getLinearMapping_(var.child(1), vList, list(), list(), list(), 0)
+        [id2, L2, R2, B2] = sopi_getLinearMapping_(var.child(2), vList, list(), list(), list(), 0)
+        // Constant term 
+        B               = B + full(B1 * B2)
+        // Linear term 
+        if length(id1) == 0 then 
+            // var1 is the constant 
+            for i = 1:length(id2)
+                L($+1)      = B1 * L2(i)
+                R($+1)      = R2(i)
+                ids($+1)    = id2(i)
+            end
+        elseif length(id2) == 0 then 
+            // var2 is the constant 
+            for i = 1:length(id1)
+                L($+1)      = L1(i)
+                R($+1)      = R1(i) * B2 
+                ids($+1)    = id1(i)
+            end
         end
-        B = B + full(A * Bi)
-    case 'rlm'
-        A           = var.child(1)
-        //
-        nextVar = var.child(2)
-        Bi = zeros(size(nextVar,1),size(nextVar,2))
-        [L, R, Bi]  = sopi_getLinearMapping_(nextVar, vList, L, R, Bi)
-        //
-        ivL = sopi_depends(var.child(2))
-        for v = ivL 
-            [dummy, i]  = sopi_varInList(v, vList)
-            R(i)        = R(i) * A
-        end        
-        B = B + full(Bi * A)
-
     else
         error('not yet')
 

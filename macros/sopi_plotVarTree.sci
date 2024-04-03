@@ -51,12 +51,21 @@ function [xm,nodes] = sopi_plotVarTree_(var, x, y, nodes)
             o   = o+nli
             plot([xm, xms],[y, y+yo],'k')
         end
-    case {'rlm','llm'}
-        
-        [xms,nodes] = sopi_plotVarTree_(var.child(1), x(1), y+yo, nodes)
+    case 'mul'
+        n1 = sopi_countLeafs(var.child(1))
+        [xms,nodes] = sopi_plotVarTree_(var.child(1), x(1:n1), y+yo, nodes)
         plot([xm, xms],[y, y+yo],'k')
-        [xms,nodes] = sopi_plotVarTree_(var.child(2), x(2:nl),y+yo, nodes)
+        [xms,nodes] = sopi_plotVarTree_(var.child(2), x(n1+1:$),y+yo, nodes)
         plot([xm, xms],[y, y+yo],'k')
+    case 'fun'
+        varOp       = varOp + ' ' + var.subop
+        o   = 0
+        for i = 1:length(var.child)
+            nli = sopi_countLeafs(var.child(i))
+            [xms, nodes] = sopi_plotVarTree_(var.child(i), x(o+(1:nli)), y+yo,nodes)
+            o   = o+nli
+            plot([xm, xms],[y, y+yo],'k')
+        end
     end
     // node text to be plotted at the end to cover links
     varDims     = string(size(var,1)) +'x' +string(size(var,2))

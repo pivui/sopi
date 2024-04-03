@@ -11,8 +11,12 @@ function [n,nlayers] = sopi_countLeafs(var,n, nlayers)
         for i =1:length(var.child)
             n = sopi_countLeafs(var.child(i),n)
         end
-    case {'rlm','llm'}
-        n = n+1
-        n = sopi_countLeafs(var.child(2),n)
+    case 'mul'
+        [n, nlayers] = sopi_countLeafs(var.child(1),n, nlayers)
+        [n, nlayers] = sopi_countLeafs(var.child(2),n, nlayers)
+    case 'fun'
+        for i =1:length(var.child)
+            [n, nlayers] = sopi_countLeafs(var.child(i),n, nlayers)
+        end
     end
 endfunction

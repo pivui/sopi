@@ -3,24 +3,25 @@ function newVar = %sopiVar_m_sopiVar(var1, var2)
     // check sizes
     ns              = sopi_checkSizeCoherence('mul', var1.size, var2.size)
     // 
-    test = [sopi_isConstant(var1), sopi_isConstant(var2)]
-    if and(test) then
-        newVar          = sopi_var(ns(1), ns(2))
-        newVar.space    = 'real'
-        newVar.operator = 'constant'
-        newVar.class    = var1.class 
-        newVar.child    = list(var1.child(1) * var2.child(1))
-    elseif test(1) & ~test(2) then
-        newVar = sopi_propagateLinearMapping('l',ns,var1.child(1), var2)
-    elseif ~test(1) & test(2) then 
-        newVar = sopi_propagateLinearMapping('r',ns,var2.child(1), var1)
-    else
+//    
+//    test = [sopi_isConstant(var1), sopi_isConstant(var2)]
+//    if and(test) then
+//        newVar          = sopi_var(ns(1), ns(2))
+//        newVar.space    = 'real'
+//        newVar.operator = 'constant'
+//        newVar.class    = var1.class 
+//        newVar.child    = list(var1.child(1) * var2.child(1))
+//    elseif test(1) & ~test(2) then
+//        newVar = sopi_propagateLinearMapping('l',ns,var1.child(1), var2)
+//    elseif ~test(1) & test(2) then 
+//        newVar = sopi_propagateLinearMapping('r',ns,var2.child(1), var1)
+//    else
         newVar          = sopi_var(ns(1), ns(2))
         newVar.space    = 'real'
         newVar.operator = 'mul'
         newVar.child    = list(var1, var2)
         newVar.class    = sopi_classRules('mul', newVar)
-    end
+//    end
 
 endfunction
 

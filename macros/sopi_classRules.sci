@@ -16,13 +16,6 @@ function c = sopi_classRules(operator, var)
     case ('mul')
         v1 = var.child(1)
         v2 = var.child(2)
-        //
-        if typeof(v1) == 'constant' then 
-            v1 = sopi_constant(v1)
-        end 
-        if typeof(v2) == 'constant' then 
-            v2 = sopi_constant(v2)
-        end 
         // constant * linear -> linear
         if sopi_isConstant(v1) & sopi_isLinear(v2) | ... 
             sopi_isConstant(v2) & sopi_isLinear(v1) then
@@ -33,7 +26,7 @@ function c = sopi_classRules(operator, var)
         if sopi_isConstant(v1) & (sopi_isConvex(v2) | sopi_isConcave(v2)) | ...
             sopi_isConstant(v2) & (sopi_isConvex(v1) | sopi_isConcave(v1)) then
             [c, iw, ib]     = sopi_sortClasses(v1.class, v2.class)
-            s               = sign(var.child(ib)) >= 0
+            s               = sign(var.child(ib).child(1)) >= 0
             if and(~s) then 
                 // change curvature
                 // negative constant * convex|concave => concave|convex
@@ -52,7 +45,7 @@ function c = sopi_classRules(operator, var)
         end
 
     case {'max','abs'}
-        args = var.child(2)
+        args = var.child
         [wc, iw] = sopi_worstClass(args)
         if isempty(wc)
             return
@@ -64,7 +57,7 @@ function c = sopi_classRules(operator, var)
         end
         c = sopi_classRules('ndconvexFun', var)
     case ('ndconvexFun')
-        args = var.child(2)
+        args = var.child
         //non decreasing convex function
         [wc, iw] = sopi_worstClass(args)
         if isempty(wc)
@@ -75,7 +68,7 @@ function c = sopi_classRules(operator, var)
             c = wc
         end
     case ('convexFun')
-        args = var.child(2)
+        args = var.child
         [wc, iw] = sopi_worstClass(args)
         if isempty(wc)
             return
