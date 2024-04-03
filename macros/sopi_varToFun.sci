@@ -46,5 +46,11 @@ function [str, data] = sopi_varToFun_(var, str, data)
         [str, data]     = sopi_varToFun_(var.child(2), str, data)
         data($+1)       = var.child(1)
         str             = str+')*data('+string(length(data))+')'
+    case 'mul'
+        str = str + '('
+        [str, data] = sopi_varToFun_(var.child(1), str, data)
+        str = str +'*'
+        [str, data] = sopi_varToFun_(var.child(2), str, data)
+        str = str + ')'
     end
 endfunction

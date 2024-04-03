@@ -4,5 +4,5 @@ function newVar = %sopiVar_max(varargin)
     newVar.child(1) = 'max'
     newVar.child(2) = varargin
     //
-    newVar.class    = sopi_classRules('max',varargin)
+    newVar.class    = sopi_classRules('max', newVar)
 endfunction

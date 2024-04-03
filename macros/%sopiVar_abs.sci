@@ -3,6 +3,6 @@
 function newVar = %sopiVar_abs(var)
    newVar           = sopi_var(size(var))
    newVar.operator  = 'fun'
-   newVar.child     = list('abs',var)
-   newVar.class     = sopi_classRules('abs',list(var));
+   newVar.child     = list('abs',list(var))
+   newVar.class     = sopi_classRules('abs',newVar);
 endfunction

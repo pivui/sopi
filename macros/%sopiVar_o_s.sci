@@ -4,5 +4,5 @@ function cst = %sopiVar_o_s(var, b)
     cst             = sopi_constraint()
     cst.operator    = '='
     cst.lhs         = var - bvar
-    cst.class       = sopi_classRules('=',cst.lhs)
+    cst.class       = sopi_classRules('=',cst)
 endfunction

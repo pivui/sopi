@@ -27,7 +27,7 @@ function [newVar, newC] = sopi_convexPWA2Linear(var)
         case 'abs'
             [m, n]          = size(var)
             slackVar        = sopi_var(m, n)
-            [newV, newC]    = sopi_convexPWA2Linear(var.child(2))
+            [newV, newC]    = sopi_convexPWA2Linear(var.child(2)(1))
             newC($+1)       = slackVar >= 0 
             newC($+1)       =  slackVar >= newV
             newC($+1)       = -slackVar <= newV

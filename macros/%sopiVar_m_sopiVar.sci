@@ -18,8 +18,8 @@ function newVar = %sopiVar_m_sopiVar(var1, var2)
         newVar          = sopi_var(ns(1), ns(2))
         newVar.space    = 'real'
         newVar.operator = 'mul'
-        newVar.class    = sopi_classRules('mul', list(var1, var2))
         newVar.child    = list(var1, var2)
+        newVar.class    = sopi_classRules('mul', newVar)
     end
 
 endfunction
@@ -86,11 +86,12 @@ function outVar = sopi_propagateLinearMapping(side, ns, A, var)
         var.child   = list(sopi_mulfun(side, A, var.child(1)))
         var.size    = ns
         outVar      = var
-    case 'fun'
+    else
         outVar          = sopi_var(ns(1),ns(2))
         outVar.space    = 'real'
         outVar.operator = side + 'lm'
-        outVar.class    = sopi_classRules('mul', list(sopi_constant(A), var))
         outVar.child    = list(A, var)      
+        outVar.class    = sopi_classRules('mul', outVar)
+
     end
 endfunction

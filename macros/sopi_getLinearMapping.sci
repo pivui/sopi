@@ -1,6 +1,6 @@
 function  lm = sopi_getLinearMapping(var, vList, p)
     //
-    if ~sopiVar_isLinear(var) then
+    if ~sopi_isLinear(var) then
         error('Cannot extract linear mapping from variable which is not a linear function')
     end
     L           = list()
