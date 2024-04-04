@@ -6,20 +6,20 @@ function newVar = %sopiVar_sum(var,opt)
       // sum along the row dimension
       if m == 1 then
          // only one row, return the var
-         newVar = var;
+         newVar = var
       else
-         newVar = ones(1,m) * var;
+         newVar = ones(1,m) * var
       end
    elseif opt == 2 then
       // sum along the column dimension
       if n == 1 then
          // only one column, return the var
-         newVar = var;
+         newVar = var
       else
-         newVar = var * ones(n,1);
+         newVar = var * ones(n,1)
       end
    elseif opt == 12 then
       // sum along both dimensions
-      newVar   = sum(sum(var,2),1);
+      newVar   = sum(sum(var,2),1)
    end
 endfunction

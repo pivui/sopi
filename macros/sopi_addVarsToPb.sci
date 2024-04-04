@@ -1,17 +1,20 @@
 function p = sopi_addVarsToPb(p, vars)
     pid = p.varsId
-    for v = vars
-        if and(v.id_ ~= pid) then
-            nvar            = size(v,'*')
-            p               = sopi_increasePbNvars(p, nvar)
-            p.vars($+1)     = v
-            p.varsId($+1)   = v.id_
-            p.varsIdx($+1)  = 1:nvar
-            if length(p.varsIdx)>1 then
-                p.varsIdx($) = p.varsIdx($) + max(p.varsIdx($-1))
+    for vi = vars
+        vList = sopi_depends(vi)
+        for v = vList
+            if and(v.id_ ~= pid) then
+                nvar            = size(v,'*')
+                p               = sopi_increasePbNvars(p, nvar)
+                p.vars($+1)     = v
+                p.varsId($+1)   = v.id_
+                p.varsIdx($+1)  = 1:nvar
+                if length(p.varsIdx)>1 then
+                    p.varsIdx($) = p.varsIdx($) + max(p.varsIdx($-1))
+                end
+                //
+                pid             = p.varsId
             end
-            //
-            pid             = p.varsId
         end
     end
 endfunction

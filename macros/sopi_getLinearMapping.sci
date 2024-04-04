@@ -27,6 +27,7 @@ function  lm = sopi_getLinearMapping(var, vList, p)
         //  vec(var) = vec(B) + SUM_i kron(R(i)', L(i)) * vec(X(i))
         //
         [m,n]   = size(var)
+        save('bug','var','p')
 //        A       = sparse([],[],[size(var,'*'), p.nvar])
         A       = zeros(m*n, p.nvar)
         for k = 1:m
@@ -61,11 +62,14 @@ function [ids, L, R, B] = sopi_getLinearMapping_(var, vList, ids, L, R, B)
             [ids, L, R, B] = sopi_getLinearMapping_(var.child(i), vList, ids, L, R, B)
         end
     case 'mul'
+        B1 = zeros(size(var.child(1),1), size(var.child(1),2))
+        B2 = zeros(size(var.child(2),1), size(var.child(2),2))
         // (sum_i L1i Xi R1i + B1) (sum_i L2j Xj R2j + B2) , one Xi/Xj is 0 each time
-        [id1, L1, R1, B1] = sopi_getLinearMapping_(var.child(1), vList, list(), list(), list(), 0)
-        [id2, L2, R2, B2] = sopi_getLinearMapping_(var.child(2), vList, list(), list(), list(), 0)
+        [id1, L1, R1, B1] = sopi_getLinearMapping_(var.child(1), vList, list(), list(), list(), B1)
+        [id2, L2, R2, B2] = sopi_getLinearMapping_(var.child(2), vList, list(), list(), list(), B2)
         // Constant term 
         B               = B + full(B1 * B2)
+        disp(size(B))
         // Linear term 
         if length(id1) == 0 then 
             // var1 is the constant 
@@ -75,7 +79,7 @@ function [ids, L, R, B] = sopi_getLinearMapping_(var, vList, ids, L, R, B)
                 ids($+1)    = id2(i)
             end
         elseif length(id2) == 0 then 
-            // var2 is the constant 
+            // var2 is the constant
             for i = 1:length(id1)
                 L($+1)      = L1(i)
                 R($+1)      = R1(i) * B2 
