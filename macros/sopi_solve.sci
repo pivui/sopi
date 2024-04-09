@@ -11,10 +11,14 @@ function  [xopt, fopt] = sopi_solve(pb, varargin)
     case 'lp'
         sopi_print(0,infoStr + "linear.\n")
         [xopt, fopt, info]   = sopi_callLPSolver(pb, method)
-        fopt                 = fopt + pb.r
+    case 'qp-convex'
+        sopi_print(0,infoStr + "convex quadratic.\n")
+        [xopt, fopt, info]   = sopi_callQPSolver(pb, 1, method)
     else
         error("Unknown class")
     end
+    // Add constant term
+    fopt                 = fopt + pb.r
     //
     xopt = sopi_assignOutput(pb, xopt) 
 endfunction

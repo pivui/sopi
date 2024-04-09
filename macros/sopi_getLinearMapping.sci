@@ -1,7 +1,19 @@
 function  lm = sopi_getLinearMapping(var, vList, p)
     //
-    if ~sopi_isLinear(var) then
+    if sopi_polyOrder(var)> 1 then
         error('Cannot extract linear mapping from variable which is not a linear function')
+    end
+    if sopi_polyOrder(var) == 0 then
+        if argn(2)<3 then
+            lm.L    = list()
+            lm.ids  = list()
+            lm.R    = list()
+            lm. B    = var.child(1)
+        else
+            lm.A    = zeros(0, p.nvar)
+            B       = var.child(1)
+            lm.b    = B(:)
+        end
     end
     B           = zeros(size(var,1),size(var,2))
     if argn(2)<2 || isempty(vList) then
@@ -26,22 +38,9 @@ function  lm = sopi_getLinearMapping(var, vList, p)
         //
         //  vec(var) = vec(B) + SUM_i kron(R(i)', L(i)) * vec(X(i))
         //
-        [m,n]   = size(var)
-//        A       = sparse([],[],[size(var,'*'), p.nvar])
-        A       = zeros(m*n, p.nvar)
-        for k = 1:m
-            for l = 1:n 
-                //
-                t = (l-1) *m + k
-                for i = 1:length(ids)
-                    // ek' * L(t) * X(it) * R(t) * el
-                    idxVari         = sopi_varIdxInPb(p, vList(ids(i)))
-                    A(t,idxVari)    = A(t, idxVari)  + kron(R(i)(:,l)', L(i)(k,:))
-                end
-            end
-        end
-        lm.A = A
-        lm.b = B(:)
+        [A, b]  = sopi_getLinearMappingMatrices(var, p, ids, L, R, B)
+        lm.A    = A
+        lm.b    = b
     end
 endfunction
 

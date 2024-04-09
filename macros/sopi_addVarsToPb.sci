@@ -31,4 +31,6 @@ function p = sopi_increasePbNvars(p, inc)
     p.A = [p.A,sparse([],[],[size(p.A,1), inc])]
     //
     p.Ae = [p.Ae,sparse([],[],[size(p.Ae,1), inc])]
+    //
+    p.Q = blockdiag(p.Q, sparse([],[],[inc,inc]))
 endfunction

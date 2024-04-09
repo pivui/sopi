@@ -180,8 +180,12 @@ function outCurv = sopi_testQuadConvexity(var)
     end
     if psd then
         outCurv = 2
+        return
     end
     if nsd then
         outCurv = -2
+        return
     end
+    outCurv = %inf
+    
 endfunction
