@@ -32,16 +32,16 @@ end
 // Objective: minimize max. of absolute value of mismatch
 fun             = norm(mismatch, %inf);
 // Create problem 
-problem         = sopi_min(fun,list());
-[xopt, fopt]    = sopi_solve(problem, 'karmarkar');
+problem             = sopi_min(fun,list());
+[xopt, fopt, info]  = sopi_solve(problem, 'karmarkar');
 // plot solution 
 for i = 1:ntest
     plot(x, y(:,i),'k.');
 end
-a0 = xopt.a0;
-a1 = xopt.a1;
-a2 = xopt.a2;
-a3 = xopt.a3;
-plot(x, a0 + a1 * x + a2*x.^2 + a3 * x.^3,'r');
+a0f = xopt.a0;
+a1f = xopt.a1;
+a2f = xopt.a2;
+a3f = xopt.a3;
+plot(x, a0f + a1f * x + a2f*x.^2 + a3f * x.^3,'r');
 
 

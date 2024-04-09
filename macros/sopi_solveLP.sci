@@ -14,8 +14,8 @@ function [xopt, fopt, flag, info] = sopi_solveLP(c, A, b, Aeq, beq, lb, ub, meth
     case "primal"
         // The general lp is converted to its standard form
         // T and d are the transformation matrices such that x_old = T*x_new + d
-        [cs, As, bs, T, d]      = sopi_lpToStandardForm(c, A, b, Aeq, beq, lb, ub)
-        [xf, ff, flag, info]    = sopi_primalSimplex(cs, As, bs)
+        [cs, As, bs, T, d]  = sopi_lpToStandardForm(c, A, b, Aeq, beq, lb, ub)
+        [xf, ff, flag]      = sopi_primalSimplex(cs, As, bs)
         if flag == 0 then
             xopt                = T*xf + d
             fopt                = c'*xopt
@@ -26,21 +26,15 @@ function [xopt, fopt, flag, info] = sopi_solveLP(c, A, b, Aeq, beq, lb, ub, meth
     else
         error("Unknown LP solver.")
     end
-    select flag
-    case 0
-        verboseFlag = ["sopiLP","The algorithm has converged.\n"]
-    case 1
-        verboseFlag = ["sopiLP","Maximum number of iterations reached.\n"]
-    case 2
-        verboseFlag = ["sopiLP","No feasible solution found.\n"]
-    case 3
-        verboseFlag = ["sopiLP","The problem is unbounded below.\n"]
-    case 4
-        verboseFlag = ["sopiLP","Failed to maintain feasibility.\n"]
-    end   
-    info.vFlag        = verboseFlag
     info.elapsedTime  = toc()
     info.cpuTime      = timer()
+    flags                = [0,1,2,3]
+    flagMeaning          = ["The algorithm has converged.",
+                            "The problem is unbounded.",
+                            "No feasible point has been found.",
+                            "Failed to maintain feasibility"]
+    //
+    info.vFlag = sopi_interpretFlag(flag, flags, flagMeaning)
 endfunction
 
 
@@ -50,11 +44,10 @@ endfunction
 
 // sopi_primalSimplex ..........................................................
 // is a basic form of the two-phases primal simplex method.
-function [xopt, fopt, flag, info] = sopi_primalSimplex(c, A, b)
+function [xopt, fopt, flag] = sopi_primalSimplex(c, A, b)
     nvar = length(c)
     xopt = []
     fopt = []
-    info = []
     flag = []
     // Phase 1 : searching for an initial feasible solution
     sopi_print(1,["sopiLP","Looking for an initial feasible solution (phase 1).\n"])
@@ -92,7 +85,7 @@ function [xopt, fopt, flag, info] = sopi_primalSimplex(c, A, b)
             //         x0p2  = xoptp1;
             //         Bp2   = B;
         end
-        [xoptp2, B, flag, info]    = sopi_simplex(cp2, Ap2, bp2, x0p2, Bp2)
+        [xoptp2, B, flag]    = sopi_simplex(cp2, Ap2, bp2, x0p2, Bp2)
         //
         xopt                       = clean(xoptp2(1:length(c)))
         fopt                       = cp2'*xoptp2
@@ -101,30 +94,30 @@ endfunction
 
 // sopi_simplex ................................................................
 // is a basic implementation of the simplex method for lp.
-function [xopt, B, flag, info] = sopi_simplex(c, A, b, x0, B)
-    info = []
+function [xopt, B, flag] = sopi_simplex(c, A, b, x0, B)
     if norm(A*x0 - b) >= 1e-9 then
         error("[sopi][sopiLP] Provided initial value in not feasible");
     end
-    x          = x0
-    N          = setdiff(1:size(x,1),B)
+    x           = x0
+    N           = setdiff(1:size(x,1),B)
+    xb          = x(B)
     //
     iter        = 0
     endSimplex  = %f
     while ~endSimplex
         iter  = iter + 1
         // basic variables
-        xb    = x(B)
+//        xb    = x(B)
         Ab    = A(:,B)
         cb    = c(B)
         // non-basic variables
-        xn    = x(N)
+//        xn    = x(N)
         An    = A(:,N)
         cn    = c(N)
         //
         if ~sopi_isInv(Ab) then
             xopt  = x
-            flag  = 4
+            flag  = 3
             break
         end
         lambda  = Ab'\cb            // dual variables
@@ -139,25 +132,36 @@ function [xopt, B, flag, info] = sopi_simplex(c, A, b, x0, B)
         [m, q]  = min(sn)
         aq      = An(:,q)
         d       = -Ab\aq
-        if and(d >= 0) then // the problem is unbounded below
+        if and(d >= 0) then 
+            // the problem is unbounded below
             xopt = []
-            flag = 3
+            flag = 1
             break
         end
         idDescent      = find(d < 0)
-        stepCandidates = xb(idDescent) ./ -d(idDescent)
-        [alpha,id]     = min(stepCandidates)
+        stepCandidates = (xb(idDescent)) ./ (-d(idDescent))
+        [alpha,id]     = min(abs(stepCandidates))
         p              = idDescent(id)
-        // next iterate
-        x(B)           = x(B) + alpha * d
-        x(N(q))        = alpha
+        if abs(x(idDescent(id))) < %eps then 
+            alpha = 0
+//            sopi_print(2,['sopiLP','Degenerate step'])
+//            pert = 0*b
+//            for j = 1:size(b,1)
+//                pert(j)  = (100*%eps)^j
+//            end
+//            b   = b + pert
+//            xb  = xb + pert
+        end
+        // next iteratea
+        xb = xb + alpha * d
+//        x(B)           = x(B) + alpha * d
+//        x(N(q))        = alpha
         // q is the entering basic variable and p is the leaving variable
         entering       = N(q)
         leaving        = B(p)
         B(p)           = entering
         N(q)           = leaving
     end
-    info.nIter = iter
 endfunction
 // ============================================================================
 // LP FORMS

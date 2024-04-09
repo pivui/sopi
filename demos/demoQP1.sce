@@ -17,5 +17,5 @@ q   = 3 * x1^2 + 2 * x1 * x2 + x1 * x3 + 2.5 * x2^2 + 2*x2*x3 + 2 * x3^2 - 8*x1 
 c1 = x1 + x3 == 3;
 c2 = x2 + x3 == 0;
 // Problem formulation 
-problem         = sopi_min(q, list(c1, c2));
-[xopt, fopt]    = sopi_solve(problem);
+problem             = sopi_min(q, list(c1, c2));
+[xopt, fopt, info]  = sopi_solve(problem);

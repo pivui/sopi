@@ -1,6 +1,6 @@
 // sopi_solve ..................................................................
 // is the interface for solving problems
-function  [xopt, fopt] = sopi_solve(pb, varargin)
+function  [xopt, fopt, info] = sopi_solve(pb, varargin)
     if argn(2) >1 then
         method = varargin(1)
     else
@@ -9,16 +9,16 @@ function  [xopt, fopt] = sopi_solve(pb, varargin)
     infoStr = 'Nature of the optimisation problem : '
     select pb.class
     case 'lp'
-        sopi_print(0,infoStr + "linear.\n")
+        sopi_print(1,infoStr + "linear.\n")
         [xopt, fopt, info]   = sopi_callLPSolver(pb, method)
     case 'qp-convex'
-        sopi_print(0,infoStr + "convex quadratic.\n")
+        sopi_print(1,infoStr + "convex quadratic.\n")
         [xopt, fopt, info]   = sopi_callQPSolver(pb, 1, method)
     else
         error("Unknown class")
     end
     // Add constant term
-    fopt                 = fopt + pb.r
+    fopt = fopt + pb.r
     //
     xopt = sopi_assignOutput(pb, xopt) 
 endfunction

@@ -8,7 +8,7 @@ function p = sopi_min(fun, cList)
 endfunction
 
 function p = sopi_problemClass(p)
-    lp = isempty(p.Q) & isempty(p.f) & isempty(p.ci) & isempty(p.ce) & ~isempty(p.c)
+    lp = norm(p.Q)==0 & isempty(p.f) & isempty(p.ci) & isempty(p.ce) & ~isempty(p.c)
     if lp then
         p.class = 'lp'
         return

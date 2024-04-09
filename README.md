@@ -5,7 +5,11 @@
 
 ## Examples
 
-Examples are gathered in the demos subfolder and named accordingly to the nature of the optimisation problem:
+Examples are gathered in the demos subfolder and are listed below by type of optimisation problem/applications. 
 
-- LP: linear problem
-- CPWA: convex piecewise affine problem
+Linear problems:
+- `demoLP1.sce`: academic LP
+- `demopolyFit.sce`: fit a polynomial to a set of (noisy) data
+
+Quadratic problems:
+- `demoQP1.sce`: academic convex QP
