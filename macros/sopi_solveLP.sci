@@ -8,8 +8,6 @@
 //                   Aeq x = beq
 //                   lb <= x <= ub
 function [xopt, fopt, flag, info] = sopi_solveLP(c, A, b, Aeq, beq, lb, ub, method)
-    tic()
-    timer()
     select method
     case "primal"
         // The general lp is converted to its standard form
@@ -26,8 +24,6 @@ function [xopt, fopt, flag, info] = sopi_solveLP(c, A, b, Aeq, beq, lb, ub, meth
     else
         error("Unknown LP solver.")
     end
-    info.elapsedTime  = toc()
-    info.cpuTime      = timer()
     flags                = [0,1,2,3]
     flagMeaning          = ["The algorithm has converged.",
                             "The problem is unbounded.",
@@ -100,14 +96,13 @@ function [xopt, B, flag] = sopi_simplex(c, A, b, x0, B)
     end
     x           = x0
     N           = setdiff(1:size(x,1),B)
-    xb          = x(B)
     //
     iter        = 0
     endSimplex  = %f
     while ~endSimplex
         iter  = iter + 1
         // basic variables
-//        xb    = x(B)
+        xb    = x(B)
         Ab    = A(:,B)
         cb    = c(B)
         // non-basic variables
@@ -143,7 +138,7 @@ function [xopt, B, flag] = sopi_simplex(c, A, b, x0, B)
         [alpha,id]     = min(abs(stepCandidates))
         p              = idDescent(id)
         if abs(x(idDescent(id))) < %eps then 
-            alpha = 0
+//            alpha = 0
 //            sopi_print(2,['sopiLP','Degenerate step'])
 //            pert = 0*b
 //            for j = 1:size(b,1)
@@ -153,7 +148,7 @@ function [xopt, B, flag] = sopi_simplex(c, A, b, x0, B)
 //            xb  = xb + pert
         end
         // next iteratea
-        xb = xb + alpha * d
+//        xb = xb + alpha * d
 //        x(B)           = x(B) + alpha * d
 //        x(N(q))        = alpha
         // q is the entering basic variable and p is the leaving variable

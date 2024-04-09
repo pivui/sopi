@@ -1,21 +1,54 @@
 // sopi_solve ..................................................................
 // is the interface for solving problems
-function  [xopt, fopt, info] = sopi_solve(pb, varargin)
-    if argn(2) >1 then
-        method = varargin(1)
-    else
+function  [xopt, fopt, info] = sopi_solve(pb, method, opt)
+    //
+    if argn(2)<2 then
         method = []
     end
-    infoStr = 'Nature of the optimisation problem : '
-    select pb.class
-    case 'lp'
-        sopi_print(1,infoStr + "linear.\n")
-        [xopt, fopt, info]   = sopi_callLPSolver(pb, method)
-    case 'qp-convex'
-        sopi_print(1,infoStr + "convex quadratic.\n")
-        [xopt, fopt, info]   = sopi_callQPSolver(pb, 1, method)
+    if argn(2) < 3 then
+        opt = []
+    end
+    //
+    sopi_print(1,'Nature of the optimisation problem:' + pb.class)
+    // Look for corresponding solvers 
+    solvers = sopi_availableSolvers(pb.class)
+    if isempty(solvers) then
+        error('No solver found for this class of problem.')
+    end
+    // Check if user supplied solver exists
+    solver = []
+    if ~isempty(method) then
+        for i = 1:length(solvers)
+            if solvers(i).name == method then 
+                solver      = solvers(i)
+                break
+            end
+        end
+        if isempty(solver) then 
+            error('Solver '''+method+''' not found for this class of problem')
+        end
     else
-        error("Unknown class")
+        solver = solvers(1)
+        method = solver.name
+    end
+    // Call solver 
+    if solver.ulbToHuge then
+        [lb, ub] = sopi_infULBtoHuge(pb)
+    end
+    opt     = sopi_fillOptions(solver.options, opt)
+    //
+    xopt    = []
+    fopt    = %inf
+    try
+        tic()
+        timer()
+        execstr(solver.callingSequence)
+        info.elapsedTime    = toc()
+        info.cpuTime        = timer()
+        info.vFlag          = sopi_interpretFlag(flag, solver.flags(1), solver.flags(2))
+    catch 
+        info.flag   = %inf
+        info.vFlag  = 'Error in '+method+': ' + lasterror()
     end
     // Add constant term
     fopt = fopt + pb.r
