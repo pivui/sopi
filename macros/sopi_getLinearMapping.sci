@@ -27,7 +27,6 @@ function  lm = sopi_getLinearMapping(var, vList, p)
         //  vec(var) = vec(B) + SUM_i kron(R(i)', L(i)) * vec(X(i))
         //
         [m,n]   = size(var)
-        save('bug','var','p')
 //        A       = sparse([],[],[size(var,'*'), p.nvar])
         A       = zeros(m*n, p.nvar)
         for k = 1:m
@@ -69,20 +68,29 @@ function [ids, L, R, B] = sopi_getLinearMapping_(var, vList, ids, L, R, B)
         [id2, L2, R2, B2] = sopi_getLinearMapping_(var.child(2), vList, list(), list(), list(), B2)
         // Constant term 
         B               = B + full(B1 * B2)
-        disp(size(B))
         // Linear term 
         if length(id1) == 0 then 
             // var1 is the constant 
             for i = 1:length(id2)
-                L($+1)      = B1 * L2(i)
-                R($+1)      = R2(i)
-                ids($+1)    = id2(i)
+                if isscalar(vList(id2(i))) then 
+                    L($+1) = B1 * L2(i) * R2(i)
+                    R($+1) = 1 
+                else
+                    L($+1)      = B1 * L2(i)
+                    R($+1)      = R2(i)
+                end
+                ids($+1)    = id2(i)   
             end
         elseif length(id2) == 0 then 
             // var2 is the constant
             for i = 1:length(id1)
-                L($+1)      = L1(i)
-                R($+1)      = R1(i) * B2 
+                if isscalar(vList(id1(i))) then 
+                    L($+1) = L1(i) * R1(i) * B2
+                    R($+1) = 1
+                else
+                    L($+1)      = L1(i)
+                    R($+1)      = R1(i) * B2 
+                end
                 ids($+1)    = id1(i)
             end
         end
