@@ -45,6 +45,7 @@ function  [xopt, fopt, info] = sopi_solve(pb, method, opt)
         execstr(solver.callingSequence)
         info.elapsedTime    = toc()
         info.cpuTime        = timer()
+        info.flag           = flag
         info.vFlag          = sopi_interpretFlag(flag, solver.flags(1), solver.flags(2))
     catch 
         info.flag   = %inf
