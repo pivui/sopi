@@ -2,6 +2,9 @@ function solvers = sopi_availableSolvers(key)
     solvers = list()
     select key
     case 'lp'
+        // ---------------------------------------------------------------------
+        // LP
+        // ---------------------------------------------------------------------
         // karmarkar: scilab built in solver 
         name            = 'karmarkar'
         callingSequence = '[xopt, fopt, flag]   = karmarkar(full(pb.Ae),full(pb.be),full(pb.c),opt.x0,opt.rtolf,opt.gam,opt.maxiter,[],full(pb.A),full(pb.b),pb.lb,pb.ub)'
@@ -24,6 +27,29 @@ function solvers = sopi_availableSolvers(key)
                                            "Failed to maintain feasibility"])
         options         = struct()
         ulbToHuge       = %F
+        solvers($+1)    = sopi_newSolver(name, callingSequence, flags, options, ulbToHuge)
+    case 'qp-convex'
+        // ---------------------------------------------------------------------
+        // CONVEX QP
+        // ---------------------------------------------------------------------
+        // qld: scilab built in 
+        name            = 'qld'
+        callingSequence = ['[xopt ,lagr ,flag]  = qld(2 * full(pb.Q), pb.c, full([pb.Ae;pb.A]),[pb.be;pb.b],lb,ub,size(pb.Ae,1))','fopt = xopt''*pb.Q*xopt + pb.c''*xopt']
+        flags           = list([0, 1, 2, 5, 10],...
+                                ["The algorithm has converged.",
+                                 "Too many iterations needed.",
+                                  "Accuracy insufficient to satisfy convergence criterion.",
+                                  "Length of working array is too short.",
+                                  "The constraints are inconsistent."])
+        options         = struct()
+        ulbToHuge       = %T
+        solvers($+1)    = sopi_newSolver(name, callingSequence, flags, options, ulbToHuge)
+        // qpsolve: scilab built in 
+        name            = 'qpsolve'
+        callingSequence = ['[xopt ,iact ,iter ,fopt]=qpsolve(2*full(pb.Q), pb.c, [pb.Ae;pb.A],[pb.be;pb.b],lb,ub,size(pb.Ae,1))', 'flag=0']
+        flags           = list([0], ['The algorithm has converged'])
+        options         = struct()
+        ulbToHuge       = %T
         solvers($+1)    = sopi_newSolver(name, callingSequence, flags, options, ulbToHuge)
     end
 endfunction

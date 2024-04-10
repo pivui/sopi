@@ -137,8 +137,9 @@ function [xopt, B, flag] = sopi_simplex(c, A, b, x0, B)
         stepCandidates = (xb(idDescent)) ./ (-d(idDescent))
         [alpha,id]     = min(abs(stepCandidates))
         p              = idDescent(id)
-        if abs(x(idDescent(id))) < %eps then 
-//            alpha = 0
+        if abs(xb(p)) < %eps then 
+            // degenerate step
+            alpha = 0
 //            sopi_print(2,['sopiLP','Degenerate step'])
 //            pert = 0*b
 //            for j = 1:size(b,1)
@@ -148,9 +149,8 @@ function [xopt, B, flag] = sopi_simplex(c, A, b, x0, B)
 //            xb  = xb + pert
         end
         // next iteratea
-//        xb = xb + alpha * d
-//        x(B)           = x(B) + alpha * d
-//        x(N(q))        = alpha
+        x(B)           = x(B) + alpha * d
+        x(N(q))        = alpha
         // q is the entering basic variable and p is the leaving variable
         entering       = N(q)
         leaving        = B(p)
