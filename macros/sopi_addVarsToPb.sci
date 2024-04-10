@@ -26,11 +26,20 @@ function p = sopi_increasePbNvars(p, inc)
     p.ub    = [p.ub; %inf * ones(inc,1)]
     p.lb    = [p.lb;-%inf * ones(inc,1)]
     //
-    p.c  = [p.c;zeros(inc,1)]
+    if ~isempty(p.c) then
+        p.c  = [p.c;zeros(inc,1)]   
+    end
     // 
-    p.A = [p.A,sparse([],[],[size(p.A,1), inc])]
+    if ~isempty(p.A) then
+        p.A = [p.A,sparse([],[],[size(p.A,1), inc])]
+    end
     //
-    p.Ae = [p.Ae,sparse([],[],[size(p.Ae,1), inc])]
+    if ~isempty(p.Ae) then
+        p.Ae = [p.Ae,sparse([],[],[size(p.Ae,1), inc])]
+    end
     //
-    p.Q = blockdiag(p.Q, sparse([],[],[inc,inc]))
+    if ~isempty(p.Q) then
+        p.Q = blockdiag(p.Q, sparse([],[],[inc,inc]))
+    end
+
 endfunction

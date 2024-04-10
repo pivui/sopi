@@ -5,23 +5,43 @@ function newVar = %sopiVar_t(var)
         newVar = var
         return 
     end
-    select var.operator
-    case 'transpose'
-        newVar = var.child(1)
-    case 'constant'
-        At      = var.child(1)'
-        newVar  = sopi_constant(At)
-    case 'sum'
-        newVar = var.child(1)'
-        for i = 2:length(var.child)
-            newVar = newVar + var.child(i)'
+    if ~isempty(var.subop) & var.subop(1) == 'transpose' then
+        newVar = var.subop(2)
+        return
+    end
+    //    newVar = sopi_propagateTranspose(var)
+    [m, n] = size(var)
+    newVar = zeros(n,m)
+    for k = 1:m
+        ek = sopi_ei(m,k,%T)
+        for l = 1:n
+            el = sopi_ei(n,l,%T)
+            newVar = newVar + var(k,l) * (el*ek')
         end
-//    case {'llm','rlm','mul'}
-//        newVar = var.child(2)' * var.child(1)'
-    else 
-        newVar          = sopi_var(var.size(2), var.size(1))
-        newVar.operator = 'transpose'
-        newVar.child(1) = var
-        newVar.class    = var.class  
+    end
+    newVar.subop = list('transpose',var)
+endfunction
+
+function newVar = sopi_propagateTranspose(var)
+    select var.operator
+    case 'constant'
+        newVar = sopi_constant(var.child(1)')
+    case 'mul'
+        newVar = sopi_propagateTranspose(var.child(2)) * sopi_propagateTranspose(var.child(1))
+    case 'sum'
+        newVar = sopi_propagateTranspose(var.child(1))
+        for i = 2:length(var.child)
+            newVar = newVar + sopi_propagateTranspose(var.child(i))
+        end
+    else
+        [m, n] = size(var)
+        newVar = zeros(n,m)
+        for k = 1:m
+            ek = sopi_ei(m,k,%T)
+            for l = 1:n
+                el = sopi_ei(n,l,%T)
+                newVar = newVar + var(k,l) * (el*ek')
+            end
+        end
     end
 endfunction

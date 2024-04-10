@@ -25,7 +25,17 @@ function c = sopi_classRules(operator, var)
         // constant * convex | concave -> depends on the sign
         if sopi_isConstant(v1) & (sopi_isConvex(v2) | sopi_isConcave(v2)) | ...
             sopi_isConstant(v2) & (sopi_isConvex(v1) | sopi_isConcave(v1)) then
-            [c, iw, ib]     = sopi_sortClasses(v1.class, v2.class)
+            if v1.operator == 'constant' then
+                iw = 2
+                ib = 1
+                c = v2.class
+            else
+                iw = 1
+                ib = 2
+                c = v1.class
+            end
+            // do  not work when only constants
+//            [c, iw, ib]     = sopi_sortClasses(v1.class, v2.class)
             s               = sign(var.child(ib).child(1)) >= 0
             if and(~s) then 
                 // change curvature

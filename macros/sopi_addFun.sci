@@ -3,13 +3,13 @@ function p = sopi_addFun(p, fun)
         error('Multi-objective optimisation is not handled')
     end
     if sopi_isLinear(fun) then
-        vars    = sopi_depends(fun)
-        p       = sopi_addVarsToPb(p, vars)
+        vars        = sopi_depends(fun)
+        p           = sopi_addVarsToPb(p, vars)
         //
-        lm      = sopi_getLinearMapping(fun, [], p)
-        p.c     = lm.A'
-        p.r     = lm.b
-        p.funClass = fun.class
+        lm          = sopi_getLinearMapping(fun, [], p)
+        p.c         = lm.A'
+        p.r         = lm.b
+        p.funClass  = fun.class
     elseif sopi_isConvexPWA(fun) then
         // CPWA is turned into linear objective + linear constraints 
         [newFun, newCons]   = sopi_convexToEpigraph(fun)
@@ -19,15 +19,21 @@ function p = sopi_addFun(p, fun)
         //
         p                   = sopi_addFun(p, newFun)
         p                   = sopi_addConstraints(p, newCons)
-        p.funClass = newFun.class
+        p.funClass          = newFun.class
     elseif sopi_isQuadratic(fun) then 
-        vars    = sopi_depends(fun)
-        p       = sopi_addVarsToPb(p, vars)
-        qm      = sopi_getQuadraticMapping(fun, p)
-        p.Q    = qm.Q(1)
-        p.c    = qm.A'
-        p.r    = qm.b
-        p.funClass = fun.class
+        vars        = sopi_depends(fun)
+        p           = sopi_addVarsToPb(p, vars)
+        qm          = sopi_getQuadraticMapping(fun, p)
+        p.Q         = qm.Q(1)
+        p.c         = qm.A'
+        p.r         = qm.b
+        p.funClass  = fun.class
+    else
+        vars        = sopi_depends(fun)
+        p           = sopi_addVarsToPb(p, vars)
+        p.funClass  = fun.class
+        [f, data]   = sopi_varToFun(fun, p)
+        p.f         = list(f, data)
     end
 endfunction
 
