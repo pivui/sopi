@@ -8,6 +8,10 @@ function newVar = sopi_vec(var)
         newVar = var
         return
     end 
+    if m == 1 then
+        newVar = var'
+        return
+    end
     //
     newVar = zeros(m*n,1)
     for k = 1:m

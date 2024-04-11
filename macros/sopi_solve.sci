@@ -64,7 +64,19 @@ function xo = sopi_assignOutput(p, xopt, fopt)
         t =  vIds(i) == p.varsId
         if or(t) then
             idx             = find(t)
-            xo(vNames(i))   =  xopt(p.varsIdx(idx))
+            // check if in list 
+            jpar = strindex(vNames(i), '(')
+            if isempty(jpar) then
+                xo(vNames(i))   =  xopt(p.varsIdx(idx))
+            else
+                // Variable is in list 
+                listName    = part(vNames(i),1:jpar-1)
+                listIndex   = evstr(part(vNames(i),jpar+1:$-1))
+                if ~isfield(xo, listName) then 
+                    xo(listName) = list()
+                end
+                xo(listName)(listIndex) = xopt(p.varsIdx(idx))
+            end
         end
     end
 endfunction

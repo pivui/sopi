@@ -7,7 +7,7 @@
 //           s.t.    A   x <= b
 //                   Aeq x = beq
 //                   lb <= x <= ub
-function [xopt, fopt, flag, info] = sopi_solveLP(c, A, b, Aeq, beq, lb, ub, method)
+function [xopt, fopt, flag, info] = sopi_LPsolver(c, A, b, Aeq, beq, lb, ub, method)
     select method
     case "primal"
         // The general lp is converted to its standard form

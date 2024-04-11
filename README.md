@@ -32,3 +32,4 @@ Linear problems:
 
 Quadratic problems:
 - `demoQP1.sce`: academic convex QP
+- `demoLinearMPC1.sce`: linear predictive control on double integrator
