@@ -7,7 +7,7 @@ function c = sopi_classRules(operator, var)
         if isempty(wc) then 
             return
         end
-        if wc.type == 'poly' & wc.order == 2 then 
+        if wc.type == 'poly' & wc.order == 2  & wc.curv == %inf then 
             var.class = wc
             // test convexity
             wc.curv = sopi_testQuadConvexity(var)
@@ -148,19 +148,30 @@ function [c, iw, ib] = sopi_sortClasses(c1, c2)
             c = c1 
             iw = 1
             ib = 2
-        else 
+            return
+        elseif c1.order <c2.order then
             c = c2
             iw = 2
             ib = 1
+            return
         end
-        return
     end
-    if c1.curv == c2.curv then 
+    if abs(c1.curv) < abs(c2.curv) then
+        c = c2
+        iw = 2
+        ib = 1
+    elseif abs(c1.curv) > abs(c2.curv) then
+        c = c1
+        iw = 1
+        ib = 2
+    elseif c1.curv == c2.curv then 
         // same curvature
         c = c1
         iw = 1
         ib = 2
+        
     end
+
 endfunction
 
 function [op, rs] = sopi_onlyPolys(vars)

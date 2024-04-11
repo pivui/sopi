@@ -31,6 +31,7 @@ for i = 1:N
     cost        = cost + y(i)^2 + alpha * u(i)^2;
 end 
 problem = sopi_min(cost, cst);
+
 // Actually solve the optimisation problem
 // -> this should be done multiple times
 x0  = [10;0];   // initial state
