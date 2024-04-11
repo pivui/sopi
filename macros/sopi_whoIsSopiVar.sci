@@ -9,7 +9,7 @@ function [vIds,vNames] = sopi_whoIsSopiVar()
         if  typeof(var) == 'sopiVar' then
             vIds($+1)   = var.id_
             vNames($+1) = varName
-        elseif typeof(var) == 'list' & typeof(var(1)) == 'sopiVar' then
+        elseif typeof(var) == 'list' & ~isempty(var) &  typeof(var(1)) == 'sopiVar' then
             for j = 1:length(var)
                 vIds($+1)   = var(j).id_
                 vNames($+1) = msprintf('%s(%d)',varName,j) 
