@@ -19,7 +19,7 @@ function  lm = sopi_getLinearMapping(var, vList, p)
     if argn(2)<2 || isempty(vList) then
         vList       = sopi_depends(var)
     end
-    [ids, L, R, B]   = sopi_getLinearMapping_(var, vList, list(), list(), list(), B)
+    [ids, op, L, R, B]   = sopi_getLinearMapping_(var, vList, list(), list(), list(), list(), B)
     //
     if argn(2) < 3 then
         // Decompose var as:
@@ -32,39 +32,41 @@ function  lm = sopi_getLinearMapping(var, vList, p)
         lm.R    = R
         lm.B    = B
         lm.ids  = ids
+        lm.op   = op
         lm.vars = vList
     else
         // Converts to vectorised form 
         //
         //  vec(var) = vec(B) + SUM_i kron(R(i)', L(i)) * vec(X(i))
         //
-        [A, b]  = sopi_getLinearMappingMatrices(var, p, ids, L, R, B)
+        [A, b]  = sopi_getLinearMappingMatrices(var, p, ids, op, L, R, B)
         lm.A    = A
         lm.b    = b
     end
 endfunction
 
-function [ids, L, R, B] = sopi_getLinearMapping_(var, vList, ids, L, R, B)
+function [ids, op, L, R, B] = sopi_getLinearMapping_(var, vList, ids, op, L, R, B)
     n = length(vList)
     select var.operator
     case 'none'
         [inList, i] = sopi_varInList(var, vList)
         [m, n]      = size(var)
         ids($+1)    = i
+        op($+1)     = var.subop
         L($+1)      = eye(m,m)
         R($+1)      = eye(n,n)
     case 'constant'
         B           = B + var.child(1)
     case 'sum'
         for i = 1:length(var.child)
-            [ids, L, R, B] = sopi_getLinearMapping_(var.child(i), vList, ids, L, R, B)
+            [ids, op, L, R, B] = sopi_getLinearMapping_(var.child(i), vList, ids, op, L, R, B)
         end
     case 'mul'
         B1 = zeros(size(var.child(1),1), size(var.child(1),2))
         B2 = zeros(size(var.child(2),1), size(var.child(2),2))
         // (sum_i L1i Xi R1i + B1) (sum_i L2j Xj R2j + B2) , one Xi/Xj is 0 each time
-        [id1, L1, R1, B1] = sopi_getLinearMapping_(var.child(1), vList, list(), list(), list(), B1)
-        [id2, L2, R2, B2] = sopi_getLinearMapping_(var.child(2), vList, list(), list(), list(), B2)
+        [id1, op1,L1, R1, B1] = sopi_getLinearMapping_(var.child(1), vList, list(), list(), list(), list(), B1)
+        [id2, op2, L2, R2, B2] = sopi_getLinearMapping_(var.child(2), vList, list(), list(), list(), list(), B2)
         // Constant term 
         B               = B + full(B1 * B2)
         // Linear term 
@@ -78,7 +80,8 @@ function [ids, L, R, B] = sopi_getLinearMapping_(var, vList, ids, L, R, B)
                     L($+1)      = B1 * L2(i)
                     R($+1)      = R2(i)
                 end
-                ids($+1)    = id2(i)   
+                ids($+1)    = id2(i)  
+                op($+1)     = op2(i) 
             end
         elseif length(id2) == 0 then 
             // var2 is the constant
@@ -91,6 +94,7 @@ function [ids, L, R, B] = sopi_getLinearMapping_(var, vList, ids, L, R, B)
                     R($+1)      = R1(i) * B2 
                 end
                 ids($+1)    = id1(i)
+                op($+1)     = op1(i)
             end
         end
     else
