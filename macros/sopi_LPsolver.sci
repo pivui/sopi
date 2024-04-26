@@ -178,12 +178,10 @@ function [cout, Aout, bout, T, d] = sopi_lpToStandardForm(c, A, b, Aeq, beq, lb,
     xAreUB(iub)             = []
     // Variables which are only lower bounded :
     // x >= lb is shifted and replaced by y = x - lb >=0
-    firstLoop = %t
+    if ~isempty(xAreLB) then
+        sopi_print(2,["sopiLP","Lower bounded variables transformation.\n"])
+    end
     for idx = xAreLB
-        if firstLoop then
-            sopi_print(2,["sopiLP","Lower bounded variables transformation.\n"])
-            firstLoop = %f
-        end
         if ~isempty(A)
             colA                = A(:,idx)
             b                   = b - colA*lb(idx)
@@ -199,12 +197,10 @@ function [cout, Aout, bout, T, d] = sopi_lpToStandardForm(c, A, b, Aeq, beq, lb,
     xArePositive = xAreLB
     // Variables which are only upper bounded :
     // x <= ub is replaced by y = -x+ub >=0
-    firstLoop = %t
-    for idx = xAreUB
-        if firstLoop then
-            sopi_print(2,["sopiLP","Upper bounded variables transformation.\n"])
-            firstLoop = %f
-        end        
+    if ~isempty(xAreUB) then
+        sopi_print(2,["sopiLP","Upper bounded variables transformation.\n"])
+    end
+    for idx = xAreUB    
         if ~isempty(A)
             colA                = A(:,idx)
             b                   = b - colA*ub(idx)
@@ -223,12 +219,10 @@ function [cout, Aout, bout, T, d] = sopi_lpToStandardForm(c, A, b, Aeq, beq, lb,
     xArePositive = [xArePositive,xAreUB]
     // Variables which are box bounded : the lb is transformed as above and the ub
     // is added as a linear inequality constraint
-    firstLoop = %t;
+    if ~isempty(xAreLUB) then
+        sopi_print(2,["sopiLP","Box bounded variables transformation.\n"])
+    end
     for  idx = xAreLUB
-        if firstLoop then
-            sopi_print(2,["sopiLP","Upper and lower bounded variables transformation.\n"])
-            firstLoop = %f
-        end
         if ~isempty(A) then 
             colA                = A(:,idx)
             b                   = b - colA*lb(idx)
