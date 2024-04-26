@@ -5,7 +5,7 @@ function out = sopi_getQuadraticMapping(var, p)
     B       = zeros(size(var,1),size(var,2))
     vList   = sopi_depends(var)
     //
-    [qids,qop, QL, QM, QR, lids,lop, L,R,B] = sopi_getQuadraticMapping_(var, vList,list(),list(), list(), list(), list(),list(),...
+    [qids, QL, QM, QR, lids, L,R,B] = sopi_getQuadraticMapping_(var, vList,list(), list(), list(),list(),...
     list(), list(), list(),B) 
     // 
     if argn(2) == 1 then
@@ -14,14 +14,12 @@ function out = sopi_getQuadraticMapping(var, p)
         out.QR      = QR 
         out.idq     = qids
         out.idl     = lids
-        out.lop     = lop
-        out.qop     = qop
         out.L       = L 
         out.R       = R
         out.B       = B
         out.vars    = vList
     else
-        [A, b]  = sopi_getLinearMappingMatrices(var, p, lids,lop, L, R, B)
+        [A, b]  = sopi_getLinearMappingMatrices(var, p, lids, L, R, B)
         out.A   = A
         out.b   = b
         // Quadratic term 
@@ -49,13 +47,12 @@ function out = sopi_getQuadraticMapping(var, p)
     end
 endfunction
 
-function [qids,qop,QL,QM,QR,lids,lop,L,R,B] = sopi_getQuadraticMapping_(var, vList, qids, qop, QL, QM, QR, ...
-                                                                         lids,lop, L, R, B)
+function [qids,QL,QM,QR,lids,L,R,B] = sopi_getQuadraticMapping_(var, vList, qids, QL, QM, QR, lids, L, R, B)
     select var.operator
     case 'sum'
         for i = 1:length(var.child)
-            [qids,qop,QL,QM,QR,lids,lop,L,R,B] = sopi_getQuadraticMapping_(var.child(i), vList, qids,qop, QL, QM, QR,...
-            lids,lop, L, R, B)
+            [qids,QL,QM,QR,lids,L,R,B] = sopi_getQuadraticMapping_(var.child(i), vList, qids, QL, QM, QR,...
+            lids, L, R, B)
         end
     case 'mul'
         r1 = sopi_polyOrder(var.child(1))
@@ -71,20 +68,17 @@ function [qids,qop,QL,QM,QR,lids,lop,L,R,B] = sopi_getQuadraticMapping_(var, vLi
                 L($+1)      = lm1.L(i)
                 R($+1)      = lm1.R(i) * lm2.B
                 lids($+1)   = lm1.ids(i)
-                lop($+1)    = lm1.op(i)
             end
             // B1 * (L2 * X2 * R2)
             for i = 1:length(lm2.ids)
                 L($+1)      = lm1.B * lm2.L(i)
                 R($+1)      = lm2.R(i)
                 lids($+1)   = lm2.ids(i)
-                lop($+1)    = lm2.op(i)
-            end 
+            end
             //
             for i = 1:length(lm1.ids)
                 for j = 1:length(lm2.ids)
                     qids($+1)   = [lm1.ids(i), lm2.ids(j)]
-                    qop($+1)    = [lm1.op(i), lm2.op(j)]
                     QL($+1)     = lm1.L(i)
                     QR($+1)     = lm2.R(j)
                     QM($+1)     = lm1.R(i) * lm2.L(j)
@@ -97,7 +91,7 @@ function [qids,qop,QL,QM,QR,lids,lop,L,R,B] = sopi_getQuadraticMapping_(var, vLi
                 nq = length(qids)
                 nl = length(lids)
                 B2 = zeros(size(var.child(2),1), size(var.child(2),2))
-                [qids,qop,QL,QM,QR,lids,lop,L,R,B2] = sopi_getQuadraticMapping_(var.child(2), vList, qids,qop, QL, QM, QR, lids, lop,L, R, B2)
+                [qids,QL,QM,QR,lids,L,R,B2] = sopi_getQuadraticMapping_(var.child(2), vList, qids, QL, QM, QR, lids, L, R, B2)
                 for i = nq+1:length(qids)
                     QL(i) = B1 * QL(i)
                 end
@@ -110,7 +104,7 @@ function [qids,qop,QL,QM,QR,lids,lop,L,R,B] = sopi_getQuadraticMapping_(var, vLi
                 nq = length(qids)
                 nl = length(lids)
                 B1 = zeros(size(var.child(1),1), size(var.child(1),2))
-                [qids,qop,QL,QM,QR,lids,lop,L,R,B1] = sopi_getQuadraticMapping_(var.child(1), vList, qids,qop, QL, QM, QR, lids,lop, L, R, B1)
+                [qids,QL,QM,QR,lids,L,R,B1] = sopi_getQuadraticMapping_(var.child(1), vList, qids, QL, QM, QR, lids, L, R, B1)
                 for i = nq+1:length(qids)
                     QR(i) = QR(i) * B2
                 end

@@ -31,7 +31,7 @@ function [xm,nodes] = sopi_plotVarTree_(var, x, y, nodes)
         if ~isempty(var.name) then
             varName = var.name 
         else
-            varName = 'var'+string(var.id_) + ' ' +var.subop
+            varName = 'var'+string(var.id_)
         end
     else
         varOp   = 'constant'
