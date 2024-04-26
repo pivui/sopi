@@ -25,7 +25,7 @@ a3 = sopi_var(1);
 //
 ntest   = 10;
 [x,y]   = sopi_noisyPolyData(ntest);
-mismatch = []
+mismatch = [];
 for i = 1:ntest
     mismatch = [mismatch;a0  + a1 * x + a2 * x.^2 + a3 * x.^3 - y(:,i)];
 end
